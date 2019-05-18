@@ -70,7 +70,7 @@ public class MapView {
         return stationNode;
     }
 
-    public void showGraph() {
+    public Graph showGraph() {
         Graph graph = this.getBaseGraphStructure(mapFactory.createMap());
         graph.addAttribute("ui.quality");
         graph.addAttribute("ui.antialias");
@@ -83,6 +83,8 @@ public class MapView {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return graph;
 
 
 
