@@ -1,0 +1,48 @@
+node {
+    size: 10px;
+    fill-color: #000;
+}
+
+node.visited {
+    fill-color: #ff312c;
+}
+
+edge {
+    shape: line;
+    fill-color: #222;
+    arrow-size: 3px, 2px;
+}
+
+edge.U1 {
+    fill-color: #FF0000;
+}
+
+edge.U2 {
+    fill-color: #ffa924;
+}
+
+edge.U3 {
+    fill-color: #57ff74;
+}
+
+edge.U4 {
+    fill-color: #2cd3ff;
+}
+
+edge.U5 {
+    fill-color: #5c1fff;
+}
+
+sprite {
+    size: 5px;
+    fill-color: #383fff;
+    text-mode: hidden;
+    z-index: 1;
+}
+
+sprite.active {
+    size: 5px;
+    fill-color: #ff312c;
+    text-mode: hidden;
+    z-index: 1;
+}
