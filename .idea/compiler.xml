@@ -6,11 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="simulation" />
+        <module name="iosl-group2" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="simulation" target="1.11" />
+      <module name="iosl-group2" target="1.11" />
     </bytecodeTargetLevel>
   </component>
 </project>
