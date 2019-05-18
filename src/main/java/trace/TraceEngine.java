@@ -6,6 +6,7 @@ import common.Line;
 import common.Station;
 
 import java.io.*;
+import java.nio.charset.MalformedInputException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,8 +27,6 @@ public class TraceEngine {
         Map<String, ArrayList<Station>> routeIdsToStations = ob.parseStations(routesToStations, "resources/stops.csv");
 
         ob.createMap(routeIdsToStations, routes_dict);
-
-
     }
 
     /**
@@ -41,7 +40,7 @@ public class TraceEngine {
 
         try (
                 Reader reader = Files.newBufferedReader(pathToFile);
-                CSVReader csvReader = new CSVReader(reader);
+                CSVReader csvReader = new CSVReader(reader, ',', '"', 1);
             ) {
 
             String[] nextRecord;
@@ -81,7 +80,7 @@ public class TraceEngine {
                     }
                 }
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {e.printStackTrace();}
 
         return routesToTrips_dict;
     }
@@ -92,23 +91,28 @@ public class TraceEngine {
 
         try (
                 Reader reader = Files.newBufferedReader(pathToFile);
-                CSVReader csvReader = new CSVReader(reader);
+                CSVReader csvReader = new CSVReader(reader, ',', '"', 1);
         ) {
             String[] nextRecord;
             while ((nextRecord = csvReader.readNext()) != null) {
-                String trip_id = nextRecord[0];
-                String station_id = nextRecord[3];
+                try{
+                    String trip_id = nextRecord[0];
+                    long station_id = Long.parseLong(nextRecord[3]);
 
-                if (tripsToStations_dict.containsKey(trip_id)) {
-                    ArrayList<Station> currentStations = tripsToStations_dict.get(trip_id);
-                    currentStations.add(new Station(station_id));
-                    tripsToStations_dict.put(trip_id, currentStations);
+                    if (tripsToStations_dict.containsKey(trip_id)) {
+                        ArrayList<Station> currentStations = tripsToStations_dict.get(trip_id);
+                        currentStations.add(new Station(station_id));
+                        tripsToStations_dict.put(trip_id, currentStations);
+                    }
+                    else {
+                        tripsToStations_dict.put(trip_id, new ArrayList<Station>(Arrays.asList(new Station(station_id))));
+                    }
+                } catch (NumberFormatException ex){
+                    System.out.println("Skipped station with id: " + nextRecord[3]);
                 }
-                else {
-                   tripsToStations_dict.put(trip_id, new ArrayList<Station>(Arrays.asList(new Station(station_id))));
-                }
+
             }
-        } catch (Exception e) {}
+        } catch (Exception e) { e.printStackTrace();}
 
         return tripsToStations_dict;
     }
@@ -140,46 +144,54 @@ public class TraceEngine {
 
         try (
                 Reader reader = Files.newBufferedReader(pathToFile);
-                CSVReader csvReader = new CSVReader(reader, ',', '"', 1);
+                CSVReader csvReader = new CSVReader(reader);
         ) {
 
             String[] nextRecord;
             while ((nextRecord = csvReader.readNext()) != null) {
 
-                Double stop_lat = Double.parseDouble(nextRecord[4]);
-                Double stop_lon = Double.parseDouble(nextRecord[5]);
-                String name = nextRecord[2];
+                try{
+                    Double stop_lat = Double.parseDouble(nextRecord[4]);
+                    Double stop_lon = Double.parseDouble(nextRecord[5]);
+                    String name = nextRecord[2];
 
-                for (String key : routesToStations.keySet()) {
-                    ArrayList<Station> stations = routesToStations.get(key);
+                    for (String key : routesToStations.keySet()) {
+                        ArrayList<Station> stations = routesToStations.get(key);
 
-                    for (int i = 0; i < stations.size(); i++) {
-                        Station st = stations.get(i);
-                        if (st.getId().contains(nextRecord[0])) {
+                        for (int i = 0; i < stations.size(); i++) {
+                            Station st = stations.get(i);
 
-                            st.setName(name);
-                            st.setLocation(new GeoCoords(stop_lat, stop_lon));
+                            if (Long.valueOf(st.getId()).equals(Long.parseLong(nextRecord[0]))) {
+
+                                st.setName(name);
+                                st.setLocation(new GeoCoords(stop_lat, stop_lon));
+                            }
                         }
                     }
+                } catch (Exception e){
+                    e.printStackTrace();
                 }
 
+
             }
-        } catch (Exception e) { System.out.println(e);}
+        } catch (Exception e) { e.printStackTrace();}
 
         return routesToStations;
     }
 
-    private Map createMap (Map<String, ArrayList<Station>> routeIdsToStations, Map<String, String> routes_dict) {
+    private common.Map createMap (Map<String, ArrayList<Station>> routeIdsToStations, Map<String, String> routes_dict) {
 
+        common.Map map = new common.Map();
+        ArrayList<Line> lines = new ArrayList<>();
         for (String key : routeIdsToStations.keySet()){
             String lineName = routes_dict.get(key);
             Line line = new Line();
-//            line.
+            line.setName(lineName);
+            line.setStations(routeIdsToStations.get(key));
+            lines.add(line);
         }
-        for (int i = 0; i < routes_dict.keySet().size(); i++) {
-            for (int j = 0; j < routeIdsToStations.keySet().size(); j++) {
-                if ()
-            }
-        }
+
+        map.setLines(lines);
+        return  map;
     }
 }
