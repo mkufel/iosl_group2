@@ -10,19 +10,19 @@ import java.util.Arrays;
 public class MapFactory {
     public Map createMap() {
         Station station1 = new Station(
-                "1",
+                1,
                 "Station 1",
                 new GeoCoords(52.5115820, 13.3225810),
                 100);
 
         Station station2 = new Station(
-                "2",
+                2,
                 "Station 2",
                 new GeoCoords(52.5068820, 13.3329270),
                 100);
 
         Station station3 = new Station(
-                "3",
+                3,
                 "Station 3",
                 new GeoCoords(52.5037630, 13.3314190),
                 100);

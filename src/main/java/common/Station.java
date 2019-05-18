@@ -1,7 +1,7 @@
 package common;
 
 public class Station {
-    private String id;
+    private int id;
 
     private String name;
 
@@ -9,7 +9,7 @@ public class Station {
 
     private int population;
 
-    public Station(String id, String name, GeoCoords location, int population) {
+    public Station(int id, String name, GeoCoords location, int population) {
         this.id = id;
         this.name = name;
         this.location = location;
@@ -19,11 +19,11 @@ public class Station {
     public Station() {
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

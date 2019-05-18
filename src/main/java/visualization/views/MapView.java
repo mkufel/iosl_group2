@@ -61,7 +61,7 @@ public class MapView {
         // Add the nodes to the graph
         Node stationNode = graph.getNode(station.getId());
         if (stationNode == null) {
-            stationNode = graph.addNode(station.getId());
+            stationNode = graph.addNode("" + station.getId());
             int[] coords = GeoCoordsUtils.convertToCartesian(station.getLocation());
             System.out.println("Coordinates Lat/Lon: " + station.getLocation().getLat() + ", " + station.getLocation().getLon());
             System.out.println("Coordinates X/Y: " + coords[0] + ", " + coords[1]);
