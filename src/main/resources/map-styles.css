@@ -5,6 +5,10 @@ node {
     z-index: 0;
 }
 
+node.visited {
+    fill-color: #ff312c;
+}
+
 edge {
     shape: line;
     fill-color: #222;
