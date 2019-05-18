@@ -1,10 +1,13 @@
 package visualization.services;
 
+import common.State;
+import common.UserState;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.ui.spriteManager.Sprite;
 import org.graphstream.ui.spriteManager.SpriteManager;
 
+import java.util.List;
 import java.util.TimerTask;
 
 public class VisualizationEngine extends TimerTask {
@@ -14,19 +17,69 @@ public class VisualizationEngine extends TimerTask {
     private Graph graph;
     private SpriteManager spriteManager;
 
-    public VisualizationEngine(Graph graph) {
+    private List<State> states;
+
+    public VisualizationEngine(Graph graph, List<State> states) {
         this.graph = graph;
         this.spriteManager = new SpriteManager(graph);
+        this.states = states;
 
     }
 
 
     @Override
     public void run() {
+
+        // drawAndMoveSprites();
+        // blinkFirstNode();
+        drawCurrentState();
         currentTick += 1;
 
-        drawAndMoveSprites();
-        // blinkFirstNode();
+    }
+
+    private void drawCurrentState() {
+        // Check if state exists
+        if (currentTick > this.states.size() - 1) {
+            return;
+        }
+
+        System.out.println("Drawing state at tick: " + currentTick);
+        State currentState = this.states.get(currentTick);
+        for (UserState userState : currentState.getUsers()) {
+            this.drawUserState(userState);
+        }
+
+    }
+
+    private void drawUserState(UserState userState) {
+        Sprite sprite = createSpriteIfDoesNotExist(userState);
+        String spriteCurrentEdge = sprite.getAttribute("currentEdge");
+        String stateCurrentEdge = userState.getEdgeId();
+
+        System.out.println("State edge:" + stateCurrentEdge);
+        if (!spriteCurrentEdge.equals(stateCurrentEdge)) {
+            System.out.println("Edges do not match");
+            sprite.detach();
+            sprite.attachToEdge(userState.getEdgeId());
+        }
+
+        sprite.setPosition(userState.getProgress());
+
+        if (userState.isData()) {
+            sprite.addAttribute("ui.class", "active");
+        }
+    }
+
+    private Sprite createSpriteIfDoesNotExist(UserState userState) {
+        Sprite sprite = this.spriteManager.getSprite("" + userState.getPersonId());
+        if (sprite == null) {
+            System.out.println("Creating sprite...");
+            sprite = this.spriteManager.addSprite("" + userState.getPersonId());
+            sprite.attachToEdge(userState.getEdgeId());
+            sprite.addAttribute("currentEdge", userState.getEdgeId());
+            sprite.setPosition(0);
+        }
+        return sprite;
     }
 
     private void drawAndMoveSprites() {

@@ -36,7 +36,7 @@ public class MapView {
 
                 if (nextStation != null) {
                     Node nextStationNode = addNodeToGraphIfDoesNotExist(graph, nextStation);
-                    addEdgeToGraphIfDoesNotExist(graph, currentStation, nextStation, currentStationNode, nextStationNode);
+                    addEdgeToGraphIfDoesNotExist(graph, currentStation, nextStation, currentStationNode, nextStationNode, line.getName());
                 }
 
             }
@@ -47,21 +47,24 @@ public class MapView {
 
     }
 
-    private void addEdgeToGraphIfDoesNotExist(Graph graph, Station startStation, Station endStation, Node startNode, Node nextStationNode) {
+    private void addEdgeToGraphIfDoesNotExist(Graph graph, Station startStation, Station endStation, Node startNode, Node nextStationNode, String lineName) {
         // Connect stations with an edge
-        String edgeId = startStation.getId() + "_" + endStation.getId();
+        String edgeId = startStation.getId() < endStation.getId() ? startStation.getId() + "_" + endStation.getId()
+                : endStation.getId() + "_" + startStation.getId();
         Edge connectingEdge = graph.getEdge(edgeId);
         if (connectingEdge == null) {
             connectingEdge = graph.addEdge(edgeId, startNode, nextStationNode);
+            connectingEdge.addAttribute("ui.class", lineName);
             System.out.println("Edge created between: " + startStation.getId() + " - " + endStation.getId());
         }
     }
 
     private Node addNodeToGraphIfDoesNotExist(Graph graph, Station station) {
         // Add the nodes to the graph
-        Node stationNode = graph.getNode(station.getId());
+        Node stationNode = graph.getNode("" + station.getId());
         if (stationNode == null) {
             stationNode = graph.addNode("" + station.getId());
+            stationNode.addAttribute("ui.label", station.getName());
             int[] coords = GeoCoordsUtils.convertToCartesian(station.getLocation());
             System.out.println("Coordinates Lat/Lon: " + station.getLocation().getLat() + ", " + station.getLocation().getLon());
             System.out.println("Coordinates X/Y: " + coords[0] + ", " + coords[1]);
@@ -85,7 +88,6 @@ public class MapView {
         }
 
         return graph;
-
 
 
     }

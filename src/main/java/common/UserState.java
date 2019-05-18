@@ -3,9 +3,9 @@ package common;
 public class UserState {
     private int personId;
 
-    private String stationStart;
+    private int stationStart;
 
-    private String stationEnd;
+    private int stationEnd;
 
     private String line;
 
@@ -14,8 +14,8 @@ public class UserState {
     private boolean data;
 
     public UserState(int personId,
-                     String stationStart,
-                     String stationEnd,
+                     int stationStart,
+                     int stationEnd,
                      String line,
                      double progress,
                      boolean data) {
@@ -35,19 +35,19 @@ public class UserState {
         this.personId = personId;
     }
 
-    public String getStationStart() {
+    public int getStationStart() {
         return stationStart;
     }
 
-    public void setStationStart(String stationStart) {
+    public void setStationStart(int stationStart) {
         this.stationStart = stationStart;
     }
 
-    public String getStationEnd() {
+    public int getStationEnd() {
         return stationEnd;
     }
 
-    public void setStationEnd(String stationEnd) {
+    public void setStationEnd(int stationEnd) {
         this.stationEnd = stationEnd;
     }
 
@@ -85,5 +85,13 @@ public class UserState {
                 ", progress=" + progress +
                 ", data=" + data +
                 '}';
+    }
+
+    public String getEdgeId() {
+        if (stationStart > stationEnd) {
+            return stationEnd + "_" + stationStart;
+        } else {
+            return stationStart + "_" + stationEnd;
+        }
     }
 }

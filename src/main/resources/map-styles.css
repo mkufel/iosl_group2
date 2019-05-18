@@ -1,8 +1,6 @@
 node {
     size: 10px;
     fill-color: #000;
-    text-mode: hidden;
-    z-index: 0;
 }
 
 node.visited {
@@ -13,6 +11,26 @@ edge {
     shape: line;
     fill-color: #222;
     arrow-size: 3px, 2px;
+}
+
+edge.U1 {
+    fill-color: #FF0000;
+}
+
+edge.U2 {
+    fill-color: #ffa924;
+}
+
+edge.U3 {
+    fill-color: #57ff74;
+}
+
+edge.U4 {
+    fill-color: #2cd3ff;
+}
+
+edge.U5 {
+    fill-color: #5c1fff;
 }
 
 sprite {

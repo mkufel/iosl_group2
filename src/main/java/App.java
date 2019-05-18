@@ -1,3 +1,4 @@
+import visualization.services.StateFactory;
 import visualization.services.VisualizationEngine;
 import visualization.views.MapView;
 
@@ -9,7 +10,7 @@ public class App {
         MapView mapView = new MapView();
 
         Timer timer = new Timer(true);
-        VisualizationEngine vis = new VisualizationEngine(mapView.showGraph());
+        VisualizationEngine vis = new VisualizationEngine(mapView.showGraph(), new StateFactory().createStates());
 
         timer.scheduleAtFixedRate(vis, 0, 1000);
     }
