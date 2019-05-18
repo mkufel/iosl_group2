@@ -20,7 +20,7 @@ public class GeoCoordsUtils {
     /**
      * Converts geographical coordinates into screen coordinates in a range [0, 100].
      */
-    static int[] convertToCartesian(GeoCoords coords) {
+    public static int[] convertToCartesian(GeoCoords coords) {
         int[] res = new int[2];
 
         res[0] = latToX(coords.getLat());
