@@ -3,6 +3,7 @@ package visualization.views;
 import common.Line;
 import common.Map;
 import common.Station;
+import org.apache.commons.io.FileUtils;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -10,6 +11,9 @@ import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.ui.view.Viewer;
 import visualization.services.GeoCoordsUtils;
 import visualization.services.MapFactory;
+
+import java.io.File;
+import java.io.IOException;
 
 public class MapView {
 
@@ -59,6 +63,8 @@ public class MapView {
         if (stationNode == null) {
             stationNode = graph.addNode(station.getId());
             int[] coords = GeoCoordsUtils.convertToCartesian(station.getLocation());
+            System.out.println("Coordinates Lat/Lon: " + station.getLocation().getLat() + ", " + station.getLocation().getLon());
+            System.out.println("Coordinates X/Y: " + coords[0] + ", " + coords[1]);
             stationNode.setAttribute("xyz", coords[0], coords[1], 0);
         }
         return stationNode;
@@ -68,5 +74,20 @@ public class MapView {
         Graph graph = this.getBaseGraphStructure(mapFactory.createMap());
         Viewer viewer = graph.display();
         viewer.disableAutoLayout();
+        try {
+            String stylesheet = readFile();
+            graph.addAttribute("ui.stylesheet", stylesheet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public String readFile() throws IOException {
+        System.out.println("Working Directory = " +
+                System.getProperty("user.dir"));
+        File file = new File("src/main/resources/map-styles.css");
+        return FileUtils.readFileToString(file, "utf-8");
     }
 }

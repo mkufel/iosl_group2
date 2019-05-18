@@ -6,10 +6,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="iosl-group2" />
         <module name="repo" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="iosl-group2" target="11" />
       <module name="repo" target="11" />
     </bytecodeTargetLevel>
   </component>
