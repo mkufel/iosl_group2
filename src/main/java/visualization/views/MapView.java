@@ -72,6 +72,9 @@ public class MapView {
 
     public void showGraph() {
         Graph graph = this.getBaseGraphStructure(mapFactory.createMap());
+        graph.addAttribute("ui.quality");
+        graph.addAttribute("ui.antialias");
+
         Viewer viewer = graph.display();
         viewer.disableAutoLayout();
         try {
@@ -80,6 +83,7 @@ public class MapView {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
 
 
     }
