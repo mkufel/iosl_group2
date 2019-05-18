@@ -74,4 +74,16 @@ public class UserState {
     public void setData(boolean data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        return "UserState{" +
+                "personId=" + personId +
+                ", stationStart='" + stationStart + '\'' +
+                ", stationEnd='" + stationEnd + '\'' +
+                ", line='" + line + '\'' +
+                ", progress=" + progress +
+                ", data=" + data +
+                '}';
+    }
 }
