@@ -12,13 +12,13 @@ public class GeoCoordsUtils {
     private static int latToX(double lat) {
 //        System.out.println((lat - MIN_LAT) / (MAX_LAT - MIN_LAT) * 100 * 1000);
 
-        return (int) ((lat - MIN_LAT) / (MAX_LAT - MIN_LAT) * 100);
+        return (int) ((lat - MIN_LAT) / (MAX_LAT - MIN_LAT) * 100 * 1000);
     }
 
     private static int lonToY(double lon) {
 //        System.out.println((lon - MIN_LON) / (MAX_LON - MIN_LON) * 100 * 1000);
 
-        return (int) ((lon - MIN_LON) / (MAX_LON - MIN_LON) * 100);
+        return (int) ((lon - MIN_LON) / (MAX_LON - MIN_LON) * 100 * 1000);
     }
 
     /**
