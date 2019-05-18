@@ -23,12 +23,14 @@ public class GeoCoordsUtils {
 
     /**
      * Converts geographical coordinates into screen coordinates in a range [0, 100].
+     *
+     * Returns [Y,X]
      */
     public static int[] convertToCartesian(GeoCoords coords) {
         int[] res = new int[2];
 
-        res[0] = latToX(coords.getLat());
-        res[1] = lonToY(coords.getLon());
+        res[1] = latToX(coords.getLat());
+        res[0] = lonToY(coords.getLon());
 
         return res;
     }
