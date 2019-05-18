@@ -1,6 +1,6 @@
 node {
-    size: 3px;
-    fill-color: #777;
+    size: 10px;
+    fill-color: #000;
     text-mode: hidden;
     z-index: 0;
 }
@@ -13,4 +13,18 @@ edge {
     shape: line;
     fill-color: #222;
     arrow-size: 3px, 2px;
+}
+
+sprite {
+    size: 5px;
+    fill-color: #383fff;
+    text-mode: hidden;
+    z-index: 1;
+}
+
+sprite.active {
+    size: 5px;
+    fill-color: #ff312c;
+    text-mode: hidden;
+    z-index: 1;
 }
