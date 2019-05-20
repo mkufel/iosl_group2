@@ -38,13 +38,10 @@ public class MapView {
                     Node nextStationNode = addNodeToGraphIfDoesNotExist(graph, nextStation);
                     addEdgeToGraphIfDoesNotExist(graph, currentStation, nextStation, currentStationNode, nextStationNode, line.getName());
                 }
-
             }
-
         }
 
         return graph;
-
     }
 
     private void addEdgeToGraphIfDoesNotExist(Graph graph, Station startStation, Station endStation, Node startNode, Node nextStationNode, String lineName) {
@@ -88,14 +85,13 @@ public class MapView {
         }
 
         return graph;
-
-
     }
 
     public String readFile() throws IOException {
         System.out.println("Working Directory = " +
                 System.getProperty("user.dir"));
         File file = new File("src/main/resources/map-styles.css");
+
         return FileUtils.readFileToString(file, "utf-8");
     }
 }

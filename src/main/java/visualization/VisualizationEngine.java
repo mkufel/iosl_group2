@@ -1,4 +1,4 @@
-package visualization.services;
+package visualization;
 
 import common.State;
 import common.UserState;
@@ -25,7 +25,6 @@ public class VisualizationEngine extends TimerTask {
         this.states = states;
 
     }
-
 
     @Override
     public void run() {
