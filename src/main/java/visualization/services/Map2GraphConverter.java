@@ -1,4 +1,4 @@
-package visualization.views;
+package visualization.services;
 
 import common.Line;
 import common.Map;
@@ -9,17 +9,32 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.ui.view.Viewer;
-import visualization.services.GeoCoordsUtils;
-import visualization.services.MapFactory;
 
 import java.io.File;
 import java.io.IOException;
 
-public class MapView {
+public class Map2GraphConverter {
 
-    private MapFactory mapFactory = new MapFactory();
+    public static Graph convert(Map map) {
+        Graph graph = getBaseGraphStructure(map);
+        graph.addAttribute("ui.quality");
+        graph.addAttribute("ui.antialias");
 
-    private Graph getBaseGraphStructure(Map map) {
+//        Viewer viewer = graph.display();
+//        viewer.disableAutoLayout();
+
+        try {
+            String stylesheet = readFile();
+            graph.addAttribute("ui.stylesheet", stylesheet);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return graph;
+    }
+
+    private static Graph getBaseGraphStructure(Map map) {
         Graph graph = new MultiGraph("Berlin");
 
         for (Line line : map.getLines()) {
@@ -44,7 +59,7 @@ public class MapView {
         return graph;
     }
 
-    private void addEdgeToGraphIfDoesNotExist(Graph graph, Station startStation, Station endStation, Node startNode, Node nextStationNode, String lineName) {
+    private static void addEdgeToGraphIfDoesNotExist(Graph graph, Station startStation, Station endStation, Node startNode, Node nextStationNode, String lineName) {
         // Connect stations with an edge
         String edgeId = startStation.getId() < endStation.getId() ? startStation.getId() + "_" + endStation.getId()
                 : endStation.getId() + "_" + startStation.getId();
@@ -56,7 +71,7 @@ public class MapView {
         }
     }
 
-    private Node addNodeToGraphIfDoesNotExist(Graph graph, Station station) {
+    private static Node addNodeToGraphIfDoesNotExist(Graph graph, Station station) {
         // Add the nodes to the graph
         Node stationNode = graph.getNode("" + station.getId());
         if (stationNode == null) {
@@ -70,24 +85,7 @@ public class MapView {
         return stationNode;
     }
 
-    public Graph showGraph() {
-        Graph graph = this.getBaseGraphStructure(mapFactory.createMap());
-        graph.addAttribute("ui.quality");
-        graph.addAttribute("ui.antialias");
-
-        Viewer viewer = graph.display();
-        viewer.disableAutoLayout();
-        try {
-            String stylesheet = readFile();
-            graph.addAttribute("ui.stylesheet", stylesheet);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return graph;
-    }
-
-    public String readFile() throws IOException {
+    private static String readFile() throws IOException {
         System.out.println("Working Directory = " +
                 System.getProperty("user.dir"));
         File file = new File("src/main/resources/map-styles.css");

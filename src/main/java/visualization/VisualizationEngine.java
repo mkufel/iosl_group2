@@ -6,6 +6,8 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.ui.spriteManager.Sprite;
 import org.graphstream.ui.spriteManager.SpriteManager;
+import org.graphstream.ui.swingViewer.ViewPanel;
+import org.graphstream.ui.view.Viewer;
 
 import java.util.List;
 import java.util.TimerTask;
@@ -15,15 +17,34 @@ public class VisualizationEngine extends TimerTask {
     private int currentTick = 0;
 
     private Graph graph;
+    private Viewer viewer;
+    private ViewPanel viewPanel;
     private SpriteManager spriteManager;
 
     private List<State> states;
 
     public VisualizationEngine(Graph graph, List<State> states) {
         this.graph = graph;
+
+        this.viewer = new Viewer(this.graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
+        this.viewer.disableAutoLayout();
+
+        this.viewPanel = this.viewer.addDefaultView(false);
+
         this.spriteManager = new SpriteManager(graph);
         this.states = states;
+    }
 
+    public int getCurrentTick() {
+        return currentTick;
+    }
+
+    public void setCurrentTick(int currentTick) {
+        this.currentTick = currentTick;
+    }
+
+    public ViewPanel getViewPanel() {
+        return this.viewPanel;
     }
 
     @Override
@@ -82,7 +103,6 @@ public class VisualizationEngine extends TimerTask {
     }
 
     private void drawAndMoveSprites() {
-
         Sprite sprite = this.spriteManager.getSprite("PERSON1");
         if (sprite == null) {
             sprite = this.spriteManager.addSprite("PERSON1");
@@ -113,9 +133,5 @@ public class VisualizationEngine extends TimerTask {
                 node.removeAttribute("ui.class");
             }
         }
-    }
-
-    public void setCurrentTick(int currentTick) {
-        this.currentTick = currentTick;
     }
 }

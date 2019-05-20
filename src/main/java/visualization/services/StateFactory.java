@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StateFactory {
-    public List<State> createStates() {
+    public static List<State> createStates() {
         List<State> states = new ArrayList<>();
 
         for (int i = 0; i < 3; i++) {

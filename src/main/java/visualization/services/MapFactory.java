@@ -8,7 +8,7 @@ import common.Station;
 import java.util.Arrays;
 
 public class MapFactory {
-    public Map createMap() {
+    public static Map createMap() {
         Station station1 = new Station(
                 1,
                 "Ernst-Reuter Platz",

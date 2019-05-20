@@ -1,5 +1,7 @@
 package visualization;
 
+import org.graphstream.ui.swingViewer.ViewPanel;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -21,13 +23,18 @@ public class Window extends JFrame {
         }
     }
 
-    public Window(String title) throws HeadlessException {
+    public Window(String title, ViewPanel graphView) throws HeadlessException {
         super(title);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         this.setJMenuBar(this.createMenuBar());
         this.getContentPane().add(this.createToolBar(), BorderLayout.NORTH);
+
+        graphView.setPreferredSize(new Dimension(800, 600));
+
+        this.getContentPane().add(graphView, BorderLayout.CENTER);
+
         this.pack();
     }
 
