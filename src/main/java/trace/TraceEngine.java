@@ -91,7 +91,7 @@ public class TraceEngine {
 
         try (
                 Reader reader = Files.newBufferedReader(pathToFile);
-                CSVReader csvReader = new CSVReader(reader, ',', '"', 1);
+                CSVReader csvReader = new CSVReader(reader, ',', '"', 1)
         ) {
             String[] nextRecord;
             while ((nextRecord = csvReader.readNext()) != null) {

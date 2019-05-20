@@ -10,14 +10,20 @@ public class Station {
     private int population;
 
     public Station(long id, String name, GeoCoords location, int population) {
-        this.id = id;
+        this(id);
+
         this.name = name;
         this.location = location;
         this.population = population;
     }
 
-    public Station() {
+    public Station(long id) {
+        this();
+
+        this.id = id;
     }
+
+    public Station() {}
 
     public long getId() {
         return id;
