@@ -324,4 +324,19 @@ public class InitEngine {
 
         return line_name;
     }
+
+    public ArrayList<Station> getUBahnStations() {
+        ArrayList<Station> allUBahnStations = new ArrayList();
+        Map<String, String> routes_dict = readRoutesFromCSV("resources/routes.csv");
+        Map<String, ArrayList<String>> routesToTrips = mapRoutesToTripsFromCSV(routes_dict, "resources/trips.csv");
+        Map<String, ArrayList<Station>> tripsToStations = parseStationTimesFromCSV("resources/stop_times.csv");
+        Map<String, ArrayList<Station>> routesToStations = mapRouteToStations(routesToTrips, tripsToStations);
+
+        for (String key : routesToStations.keySet()){
+            ArrayList<Station> stations = routesToStations.get(key);
+            allUBahnStations.addAll(stations);
+        }
+        allUBahnStations = new ArrayList<>(new HashSet<>(allUBahnStations));
+        return allUBahnStations;
+    }
 }

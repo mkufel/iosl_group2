@@ -56,4 +56,12 @@ public class Station {
     public void setPopulation(int population) {
         this.population = population;
     }
+
+    public boolean equals(Object object) {
+        if(object instanceof Station && ((Station)object).getId() == this.id) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

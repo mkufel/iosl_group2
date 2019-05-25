@@ -5,11 +5,15 @@ import java.util.List;
 public class State {
     private int tick;
 
-    private List<UserState> users;
+    private List<UserState> userStates;
 
-    public State(int tick, List<UserState> users) {
+    public State(int tick) {
         this.tick = tick;
-        this.users = users;
+    }
+
+    public State(int tick, List<UserState> userStates) {
+        this.tick = tick;
+        this.userStates = userStates;
     }
 
     public int getTick() {
@@ -20,11 +24,15 @@ public class State {
         this.tick = tick;
     }
 
-    public List<UserState> getUsers() {
-        return users;
+    public List<UserState> getUserStates() {
+        return userStates;
     }
 
-    public void setUsers(List<UserState> users) {
-        this.users = users;
+    public void setUserStates(List<UserState> userStates) {
+        this.userStates = userStates;
+    }
+
+    public void addUserState(UserState userState) {
+        this.userStates.add(userState);
     }
 }
