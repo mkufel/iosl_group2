@@ -1,5 +1,7 @@
 package visualization;
 
+import TraceGenerationEngine.ConfigurationChangedCallback;
+import TraceGenerationEngine.TraceGenerationEngine;
 import org.graphstream.ui.swingViewer.ViewPanel;
 
 import javax.swing.*;
@@ -10,6 +12,7 @@ import java.awt.event.ActionListener;
 public class Window extends JFrame {
 
     VisualizationEngine visualizationEngine;
+    TraceGenerationEngine traceGenerationEngine;
     ViewPanel graphView;
 
     private static class TextIndicator extends JTextField {
@@ -28,9 +31,10 @@ public class Window extends JFrame {
         }
     }
 
-    public Window(String title, ViewPanel graphView, VisualizationEngine engine) throws HeadlessException {
+    public Window(String title, ViewPanel graphView, VisualizationEngine engine, TraceGenerationEngine traceGenerationEngine) throws HeadlessException {
         super(title);
         this.visualizationEngine = engine;
+        this.traceGenerationEngine = traceGenerationEngine;
         this.graphView = graphView;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -148,6 +152,13 @@ public class Window extends JFrame {
         JLabel labelSimulatedPopulation = new JLabel("Simulated population");
         TextIndicator fieldSimulatedPopulation = new TextIndicator();
         fieldSimulatedPopulation.setText("3000");
+
+        traceGenerationEngine.setConfigurationChangedCallback(new ConfigurationChangedCallback() {
+            @Override
+            public void onConfigurationChanged(int totalPopulation, int totalTicks) {
+                fieldSimulatedPopulation.setText(Integer.toString(totalPopulation));
+            }
+        });
 
         JLabel labelActiveAgents = new JLabel("Active agents");
         TextIndicator fieldActiveAgents = new TextIndicator();

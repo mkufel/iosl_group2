@@ -1,6 +1,5 @@
 package TraceGenerationEngine;
 
-import com.sun.deploy.trace.Trace;
 import common.ScheduleItem;
 import common.State;
 import common.Station;
@@ -19,6 +18,11 @@ public class TraceGenerationEngine {
     InitEngine initEngine;
     ArrayList<Station> allUBahnStations;
     Map<String, ArrayList<ScheduleItem>> stopsWithSchedule;
+    int total_users;
+    int total_ticks;
+
+    ConfigurationChangedCallback configurationChangedCallback;
+
     public static void main(String[] args) throws IOException {
 //        InitEngine initEngine = new InitEngine();
         TraceGenerationEngine tce = new TraceGenerationEngine();
@@ -58,12 +62,11 @@ public class TraceGenerationEngine {
     }
 
     public ArrayList<State> getStates() throws IOException {
-        ArrayList<State> states= new ArrayList<State>();
-        int total_users = Integer.parseInt(_getConfigValue("total_users"));
-        int total_ticks = Integer.parseInt(_getConfigValue("total_ticks"));
+        ArrayList<State> states = new ArrayList<State>();
+        loadInitialPopulationValues();
 
         //initialise empty states
-        for (int i=0; i < total_ticks; i++) {
+        for (int i = 0; i < total_ticks; i++) {
             states.add(new State(i, new ArrayList<>()));
         }
         Random rand = new Random();
@@ -80,10 +83,10 @@ public class TraceGenerationEngine {
                     break;
                 }
                 state = states.get(tick);
-                if(this.stopsWithSchedule.get(Long.toString(startStation.getId())) != null) {
+                if (this.stopsWithSchedule.get(Long.toString(startStation.getId())) != null) {
                     ScheduleItem someScheduleItem = (this.stopsWithSchedule.get(Long.toString(startStation.getId()))).get(0);
                     endStation = Long.parseLong(someScheduleItem.getNextStop_id());
-                    UserState userState = new UserState(i, startStation.getId(), endStation, "U?", (double)(tick - startTick)/totalStops, false);
+                    UserState userState = new UserState(i, startStation.getId(), endStation, "U?", (double) (tick - startTick) / totalStops, false);
                     state.addUserState(userState);
                 }
             }
@@ -91,11 +94,17 @@ public class TraceGenerationEngine {
         return states;
     }
 
+    private void loadInitialPopulationValues() throws IOException {
+        total_users = Integer.parseInt(_getConfigValue("total_users"));
+        total_ticks = Integer.parseInt(_getConfigValue("total_ticks"));
+
+    }
+
     private Station getStartStation() throws IOException {
         ArrayList<Long> station_ids = new ArrayList<>();
         ArrayList<Double> popularities = new ArrayList<>();
         Double totalProbabilityCovered = 0.0;
-        for(Station s:this.allUBahnStations) {
+        for (Station s : this.allUBahnStations) {
             Double station_popularity = Double.parseDouble(_getConfigValue("station." + s.getId()));
             if (station_popularity != null) {
                 station_ids.add(s.getId());
@@ -107,9 +116,9 @@ public class TraceGenerationEngine {
         Random rand = new Random();
 
         Double randNum = rand.nextDouble() * totalProbabilityCovered;
-        for (int i=0; i<popularities.size() - 1; i++) {
-            if(popularities.get(i) <= randNum && popularities.get(i+1) > randNum ) {
-                int index =  this.allUBahnStations.indexOf(new Station(station_ids.get(i)));
+        for (int i = 0; i < popularities.size() - 1; i++) {
+            if (popularities.get(i) <= randNum && popularities.get(i + 1) > randNum) {
+                int index = this.allUBahnStations.indexOf(new Station(station_ids.get(i)));
                 if (index > -1) {
                     return this.allUBahnStations.get(index);
                 } else {
@@ -118,5 +127,13 @@ public class TraceGenerationEngine {
             }
         }
         return this.allUBahnStations.get(0);
+    }
+
+    public ConfigurationChangedCallback getConfigurationChangedCallback() {
+        return configurationChangedCallback;
+    }
+
+    public void setConfigurationChangedCallback(ConfigurationChangedCallback configurationChangedCallback) {
+        this.configurationChangedCallback = configurationChangedCallback;
     }
 }
