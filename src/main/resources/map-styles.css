@@ -1,11 +1,7 @@
 node {
     size: 3px;
     fill-color: #000;
-<<<<<<< Updated upstream
     text-mode: hidden;
-
-=======
->>>>>>> Stashed changes
 }
 
 node.visited {
@@ -19,7 +15,7 @@ edge {
 }
 
 edge.U1 {
-<<<<<<< Updated upstream
+
     fill-color: #55a821;
 }
 
@@ -57,25 +53,6 @@ edge.U8 {
 
 edge.U9 {
     fill-color: #ff7200;
-=======
-    fill-color: #FF0000;
-}
-
-edge.U2 {
-    fill-color: #ffa924;
-}
-
-edge.U3 {
-    fill-color: #57ff74;
-}
-
-edge.U4 {
-    fill-color: #2cd3ff;
-}
-
-edge.U5 {
-    fill-color: #5c1fff;
->>>>>>> Stashed changes
 }
 
 sprite {

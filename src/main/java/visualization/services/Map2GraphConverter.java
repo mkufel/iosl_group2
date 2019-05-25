@@ -8,7 +8,6 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
-import org.graphstream.ui.view.Viewer;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +25,7 @@ public class Map2GraphConverter {
         try {
             String stylesheet = readFile();
             graph.addAttribute("ui.stylesheet", stylesheet);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -59,11 +57,8 @@ public class Map2GraphConverter {
         return graph;
     }
 
-<<<<<<< Updated upstream:src/main/java/visualization/services/Map2GraphConverter.java
+
     private static void addEdgeToGraphIfDoesNotExist(Graph graph, Station startStation, Station endStation, Node startNode, Node nextStationNode, String lineName) {
-=======
-    private void addEdgeToGraphIfDoesNotExist(Graph graph, Station startStation, Station endStation, Node startNode, Node nextStationNode, String lineName) {
->>>>>>> Stashed changes:src/main/java/visualization/views/MapView.java
         // Connect stations with an edge
         String edgeId = startStation.getId() < endStation.getId() ? startStation.getId() + "_" + endStation.getId()
                 : endStation.getId() + "_" + startStation.getId();
@@ -79,14 +74,8 @@ public class Map2GraphConverter {
         // Add the nodes to the graph
         Node stationNode = graph.getNode("" + station.getId());
         if (stationNode == null) {
-<<<<<<< Updated upstream:src/main/java/visualization/services/Map2GraphConverter.java
             stationNode = graph.addNode("" + station.getId());
             stationNode.addAttribute("ui.label", station.getName());
-=======
-            stationNode = graph.addNode(station.getId());
-            stationNode.addAttribute("ui.label", station.getName());
-
->>>>>>> Stashed changes:src/main/java/visualization/views/MapView.java
             int[] coords = GeoCoordsUtils.convertToCartesian(station.getLocation());
             System.out.println("Coordinates Lat/Lon: " + station.getLocation().getLat() + ", " + station.getLocation().getLon());
             System.out.println("Coordinates X/Y: " + coords[0] + ", " + coords[1]);
@@ -95,30 +84,8 @@ public class Map2GraphConverter {
         return stationNode;
     }
 
-<<<<<<< Updated upstream:src/main/java/visualization/services/Map2GraphConverter.java
-    private static String readFile() throws IOException {
-=======
-    public Graph showGraph() {
-        Graph graph = this.getBaseGraphStructure(mapFactory.createMap());
-        graph.addAttribute("ui.quality");
-        graph.addAttribute("ui.antialias");
 
-        Viewer viewer = graph.display();
-        viewer.disableAutoLayout();
-        try {
-            String stylesheet = readFile();
-            graph.addAttribute("ui.stylesheet", stylesheet);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return graph;
-
-
-    }
-
-    public String readFile() throws IOException {
->>>>>>> Stashed changes:src/main/java/visualization/views/MapView.java
+    public static String readFile() throws IOException {
         System.out.println("Working Directory = " +
                 System.getProperty("user.dir"));
         File file = new File("src/main/resources/map-styles.css");
