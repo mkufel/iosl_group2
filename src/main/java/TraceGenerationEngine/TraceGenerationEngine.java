@@ -98,6 +98,10 @@ public class TraceGenerationEngine {
         total_users = Integer.parseInt(_getConfigValue("total_users"));
         total_ticks = Integer.parseInt(_getConfigValue("total_ticks"));
 
+        if (this.configurationChangedCallback != null) {
+            this.configurationChangedCallback.onConfigurationChanged(total_users, total_ticks);
+        }
+
     }
 
     private Station getStartStation() throws IOException {

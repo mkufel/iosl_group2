@@ -9,6 +9,7 @@ import org.graphstream.ui.spriteManager.SpriteManager;
 import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.view.Viewer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 
@@ -69,6 +70,13 @@ public class VisualizationEngine extends TimerTask {
         if (currentTick > this.states.size() - 1 || currentTick < 0) {
             this.isRunning = false;
             return;
+        }
+
+        List<Sprite> toRemoveSprites = new ArrayList<>();
+        this.spriteManager.iterator().forEachRemaining(toRemoveSprites::add);
+
+        for (Sprite sprite : toRemoveSprites) {
+            this.spriteManager.removeSprite(sprite.getId());
         }
 
         System.out.println("Drawing state at tick: " + currentTick);

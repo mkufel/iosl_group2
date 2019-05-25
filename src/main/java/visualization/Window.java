@@ -5,6 +5,8 @@ import TraceGenerationEngine.TraceGenerationEngine;
 import org.graphstream.ui.swingViewer.ViewPanel;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -96,9 +98,7 @@ public class Window extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                graphView.resizeFrame(800, 600);
-                graphView.repaint();
-                // visualizationEngine.toggleSimulation();x
+                visualizationEngine.toggleSimulation();
             }
         });
         menuEdit.add(new JMenuItem("Step back")).addActionListener(new ActionListener() {
@@ -120,7 +120,7 @@ public class Window extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 graphView.getCamera().resetView();
 
-                // visualizationEngine.restart();
+                visualizationEngine.restart();
             }
         });
         menuEdit.add(new JMenuItem("Reload simulation")).addActionListener(new ActionListener() {
@@ -153,10 +153,22 @@ public class Window extends JFrame {
         TextIndicator fieldSimulatedPopulation = new TextIndicator();
         fieldSimulatedPopulation.setText("3000");
 
+        JSlider sliderTick = new JSlider(SwingConstants.HORIZONTAL);
+        sliderTick.setValue(0);
         traceGenerationEngine.setConfigurationChangedCallback(new ConfigurationChangedCallback() {
             @Override
             public void onConfigurationChanged(int totalPopulation, int totalTicks) {
                 fieldSimulatedPopulation.setText(Integer.toString(totalPopulation));
+                sliderTick.setMaximum(totalTicks);
+                sliderTick.setMinimum(0);
+            }
+        });
+
+        sliderTick.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                int tickSelected = sliderTick.getValue();
+                visualizationEngine.setCurrentTick(tickSelected);
             }
         });
 
@@ -194,7 +206,6 @@ public class Window extends JFrame {
                 visualizationEngine.setCurrentTick(visualizationEngine.getCurrentTick() + 1);
             }
         });
-        JSlider sliderTick = new JSlider(SwingConstants.HORIZONTAL);
 
         tools.add(labelSimulatedPopulation);
         tools.add(fieldSimulatedPopulation);
