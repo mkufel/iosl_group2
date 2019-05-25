@@ -33,6 +33,14 @@ public class InitEngine {
 
     }
 
+    
+    public Map<String, ArrayList<ScheduleItem>> getStopsWithSchedule() {
+        Map<String, String> routeIdsToLineNames = this.readRoutesFromCSV("resources/routes.csv");
+        Map<String, ArrayList<String>> routesToTrips = this.mapRoutesToTripsFromCSV(routeIdsToLineNames, "resources/trips.csv");
+
+        return this.mapStopsToScheduleItems("resources/stop_times.csv", routesToTrips, routeIdsToLineNames);
+    }
+
     /**
      * Parse the CSV file mapping ubahn lines to route identifiers
      * @param fileName input file "routes.csv"
