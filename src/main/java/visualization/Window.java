@@ -4,8 +4,12 @@ import org.graphstream.ui.swingViewer.ViewPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Window extends JFrame {
+
+    VisualizationEngine visualizationEngine;
 
     private static class TextIndicator extends JTextField {
         TextIndicator() {
@@ -23,8 +27,9 @@ public class Window extends JFrame {
         }
     }
 
-    public Window(String title, ViewPanel graphView) throws HeadlessException {
+    public Window(String title, ViewPanel graphView, VisualizationEngine engine) throws HeadlessException {
         super(title);
+        this.visualizationEngine = engine;
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -41,29 +46,69 @@ public class Window extends JFrame {
     private JMenuBar createMenuBar() {
         JMenuBar menu = new JMenuBar();
 
-        JMenu menuFile = new JMenu("File");
-        menuFile.add(new JMenuItem("Open"));
-        menuFile.add(new JMenuItem("Save as..."));
-        menuFile.add(new JSeparator());
-        menuFile.add(new JMenuItem("Settings"));
-        menuFile.add(new JMenuItem("Exit"));
+        JMenu menuFile = createFileMenu();
 
-        JMenu menuEdit = new JMenu("Edit");
-        menuEdit.add(new JMenuItem("Pause/Resume"));
-        menuEdit.add(new JMenuItem("Step back"));
-        menuEdit.add(new JMenuItem("Step forward"));
-        menuEdit.add(new JSeparator());
-        menuEdit.add(new JMenuItem("Restart visualization"));
-        menuEdit.add(new JMenuItem("Reload simulation"));
+        JMenu menuEdit = createEditMenu();
 
-        JMenu menuHelp = new JMenu("Help");
-        menuHelp.add(new JMenuItem("About"));
+        JMenu menuHelp = createHelpMenu();
 
         menu.add(menuFile);
         menu.add(menuEdit);
         menu.add(menuHelp);
 
         return menu;
+    }
+
+    private JMenu createHelpMenu() {
+        JMenu menuHelp = new JMenu("Help");
+        menuHelp.add(new JMenuItem("About"));
+        return menuHelp;
+    }
+
+    private JMenu createEditMenu() {
+        JMenu menuEdit = new JMenu("Edit");
+        menuEdit.add(new JMenuItem("Pause/Resume")).addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                visualizationEngine.toggleSimulation();
+            }
+        });
+        menuEdit.add(new JMenuItem("Step back")).addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                visualizationEngine.setCurrentTick(visualizationEngine.getCurrentTick() - 1);
+            }
+        });
+        menuEdit.add(new JMenuItem("Step forward")).addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                visualizationEngine.setCurrentTick(visualizationEngine.getCurrentTick() + 1);
+            }
+        });
+        menuEdit.add(new JSeparator());
+        menuEdit.add(new JMenuItem("Restart visualization")).addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                visualizationEngine.restart();
+            }
+        });
+        menuEdit.add(new JMenuItem("Reload simulation")).addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Reload pressed.");
+            }
+        });
+        return menuEdit;
+    }
+
+    private JMenu createFileMenu() {
+        JMenu menuFile = new JMenu("File");
+        menuFile.add(new JMenuItem("Open"));
+        menuFile.add(new JMenuItem("Save as..."));
+        menuFile.add(new JSeparator());
+        menuFile.add(new JMenuItem("Settings"));
+        menuFile.add(new JMenuItem("Exit"));
+        return menuFile;
     }
 
     private JToolBar createToolBar() {
@@ -108,4 +153,5 @@ public class Window extends JFrame {
 
         return tools;
     }
+
 }

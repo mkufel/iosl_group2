@@ -16,6 +16,7 @@ public class VisualizationEngine extends TimerTask {
 
     private int currentTick = 0;
 
+    private boolean isRunning = false;
     private Graph graph;
     private Viewer viewer;
     private ViewPanel viewPanel;
@@ -41,6 +42,11 @@ public class VisualizationEngine extends TimerTask {
 
     public void setCurrentTick(int currentTick) {
         this.currentTick = currentTick;
+
+        // If the simulation is not running we should visualize manual movement of states/ticks
+        if (!isRunning) {
+            this.drawCurrentState();
+        }
     }
 
     public ViewPanel getViewPanel() {
@@ -49,11 +55,10 @@ public class VisualizationEngine extends TimerTask {
 
     @Override
     public void run() {
-
-        // drawAndMoveSprites();
-        // blinkFirstNode();
-        drawCurrentState();
-        currentTick += 1;
+        if (this.isRunning) {
+            drawCurrentState();
+            currentTick += 1;
+        }
 
     }
 
@@ -100,6 +105,24 @@ public class VisualizationEngine extends TimerTask {
             sprite.setPosition(0);
         }
         return sprite;
+    }
+
+
+    public void toggleSimulation() {
+        this.isRunning = !this.isRunning;
+    }
+
+    public void restart() {
+        this.currentTick = 0;
+        this.isRunning = true;
+    }
+
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    public void setRunning(boolean running) {
+        isRunning = running;
     }
 
     private void drawAndMoveSprites() {
