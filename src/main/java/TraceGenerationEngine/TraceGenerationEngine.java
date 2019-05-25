@@ -1,5 +1,7 @@
 package TraceGenerationEngine;
 
+import com.sun.deploy.trace.Trace;
+import common.ScheduleItem;
 import common.State;
 import common.Station;
 import common.UserState;
@@ -9,23 +11,27 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 
 public class TraceGenerationEngine {
     InitEngine initEngine;
     ArrayList<Station> allUBahnStations;
+    Map<String, ArrayList<ScheduleItem>> stopsWithSchedule;
     public static void main(String[] args) throws IOException {
-        InitEngine initEngine = new InitEngine();
+//        InitEngine initEngine = new InitEngine();
+        TraceGenerationEngine tce = new TraceGenerationEngine();
 //        System.out.println(tce.getStates());
-//        System.out.println(initEngine.getStates());
-        Object a = initEngine.getStopsWithSchedule();
-        System.out.println(a);
+        System.out.println(tce.getStates());
+//        Object a = initEngine.getStopsWithSchedule();
+//        System.out.println(a);
     }
 
     public TraceGenerationEngine() {
         initEngine = new InitEngine();
         allUBahnStations = initEngine.getUBahnStations();
+        stopsWithSchedule = initEngine.getStopsWithSchedule();
     }
 
     private String _getConfigValue(String key) throws IOException {
@@ -66,6 +72,7 @@ public class TraceGenerationEngine {
             System.out.println("Generating state for user id: " + i);
             int startTick = rand.nextInt(total_ticks);
             Station startStation = getStartStation();
+            Long endStation = null;
             int totalStops = 5 + rand.nextInt(11);
             State state;
             for (int tick = startTick; tick < startTick + totalStops; tick++) {
@@ -73,8 +80,12 @@ public class TraceGenerationEngine {
                     break;
                 }
                 state = states.get(tick);
-                UserState userState = new UserState(i, startStation.getId(), null, null, 0, false);
-                state.addUserState(userState);
+                if(this.stopsWithSchedule.get(Long.toString(startStation.getId())) != null) {
+                    ScheduleItem someScheduleItem = (this.stopsWithSchedule.get(Long.toString(startStation.getId()))).get(0);
+                    endStation = Long.parseLong(someScheduleItem.getNextStop_id());
+                    UserState userState = new UserState(i, startStation.getId(), endStation, "U?", (double)(tick - startTick)/totalStops, false);
+                    state.addUserState(userState);
+                }
             }
         }
         return states;
