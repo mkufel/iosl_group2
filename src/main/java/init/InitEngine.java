@@ -1,4 +1,4 @@
-package trace;
+package init;
 
 import com.opencsv.CSVReader;
 import common.GeoCoords;
@@ -9,23 +9,25 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Time;
 import java.util.*;
 
-public class TraceEngine {
+public class InitEngine {
 
 
-    public TraceEngine() {}
+    public InitEngine() {}
 
 
     public static void main(String[] args) {
-        TraceEngine ob = new TraceEngine();
-        Map<String, String> routes_dict = ob.readRoutesFromCSV("resources/routes.csv");
-        Map<String, ArrayList<String>> routesToTrips = ob.mapRoutesToTripsFromCSV(routes_dict, "resources/trips.csv");
-        Map<String, ArrayList<Station>> tripsToStations = ob.parseStationTimesFromCSV("resources/stop_times.csv");
-        Map<String, ArrayList<Station>> routesToStations = ob.mapRouteToStations(routesToTrips, tripsToStations);
-        Map<String, ArrayList<Station>> routeIdsToStations = ob.addStationCoordsToRouteStationsMapping(routesToStations, "resources/stops.csv");
 
-        ob.createMap(routeIdsToStations, routes_dict);
+        InitEngine ob = new InitEngine();
+//        Map<String, String> routes_dict = ob.readRoutesFromCSV("resources/routes.csv");
+//        Map<String, ArrayList<String>> routesToTrips = ob.mapRoutesToTripsFromCSV(routes_dict, "resources/trips.csv");
+//        Map<String, ArrayList<Station>> tripsToStations = ob.parseStationTimesFromCSV("resources/stop_times.csv");
+//        Map<String, ArrayList<Station>> routesToStations = ob.mapRouteToStations(routesToTrips, tripsToStations);
+//        Map<String, ArrayList<Station>> routeIdsToStations = ob.addStationCoordsToRouteStationsMapping(routesToStations, "resources/stops.csv");
+//
+//        ob.createMap(routeIdsToStations, routes_dict);
     }
 
     /**
@@ -204,6 +206,7 @@ public class TraceEngine {
         return routesToStations;
     }
 
+
     private common.Map createMap (Map<String, ArrayList<Station>> routeIdsToStations, Map<String, String> routes_dict) {
 
         common.Map map = new common.Map();
@@ -219,4 +222,13 @@ public class TraceEngine {
         map.setLines(lines);
         return  map;
     }
+
+
+    // private ArrayList<String, Map<String, ArrayList<String/Time>>>
+    // Map trip - (station_id, time). tuple as a nested class OR route - (Key: station_id, Value: List<time>)
+    // ArrayList(UserState)
+    // For each randomly start location, 80% go to next random station from your current station.
+    // If any other route contains currentStation then you can switch else stay on the given route.
+    // Probability of termination
+
 }
