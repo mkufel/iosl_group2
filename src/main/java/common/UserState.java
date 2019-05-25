@@ -3,9 +3,9 @@ package common;
 public class UserState {
     private int personId;
 
-    private int stationStart;
+    private Long stationStart;
 
-    private int stationEnd;
+    private Long stationEnd;
 
     private String line;
 
@@ -13,9 +13,11 @@ public class UserState {
 
     private boolean data;
 
+    public UserState() {}
+
     public UserState(int personId,
-                     int stationStart,
-                     int stationEnd,
+                     Long stationStart,
+                     Long stationEnd,
                      String line,
                      double progress,
                      boolean data) {
@@ -35,19 +37,19 @@ public class UserState {
         this.personId = personId;
     }
 
-    public int getStationStart() {
+    public Long getStationStart() {
         return stationStart;
     }
 
-    public void setStationStart(int stationStart) {
+    public void setStationStart(Long stationStart) {
         this.stationStart = stationStart;
     }
 
-    public int getStationEnd() {
+    public Long getStationEnd() {
         return stationEnd;
     }
 
-    public void setStationEnd(int stationEnd) {
+    public void setStationEnd(Long stationEnd) {
         this.stationEnd = stationEnd;
     }
 

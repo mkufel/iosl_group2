@@ -73,7 +73,7 @@ public class VisualizationEngine extends TimerTask {
 
         System.out.println("Drawing state at tick: " + currentTick);
         State currentState = this.states.get(currentTick);
-        for (UserState userState : currentState.getUsers()) {
+        for (UserState userState : currentState.getUserStates()) {
             this.drawUserState(userState);
         }
 

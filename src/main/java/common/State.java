@@ -5,14 +5,14 @@ import java.util.List;
 public class State {
     private int tick;
 
-    private List<UserState> users;
+    private List<UserState> userStates;
 
     private int activeAgents = 0;
 
     public State(int tick, List<UserState> users) {
         this.tick = tick;
-        this.users = users;
-        this.activeAgents = this.users.stream()
+        this.userStates = users;
+        this.activeAgents = this.userStates.stream()
                 .reduce(0, (totalActive, user) -> totalActive + (user.isData() ? 1 : 0), Integer::sum);
     }
 
@@ -24,12 +24,16 @@ public class State {
         this.tick = tick;
     }
 
-    public List<UserState> getUsers() {
-        return users;
+    public List<UserState> getUserStates() {
+        return userStates;
     }
 
-    public void setUsers(List<UserState> users) {
-        this.users = users;
+    public void setUserStates(List<UserState> userStates) {
+        this.userStates = userStates;
+    }
+
+    public void addUserState(UserState userState) {
+        this.userStates.add(userState);
     }
 
     public int getActiveAgents() {

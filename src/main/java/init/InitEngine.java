@@ -3,6 +3,7 @@ package init;
 import com.opencsv.CSVReader;
 import common.GeoCoords;
 import common.Line;
+import common.ScheduleItem;
 import common.Station;
 
 import java.io.Reader;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.*;
 
 public class InitEngine {
 
@@ -24,13 +26,24 @@ public class InitEngine {
     public static void main(String[] args) {
 
         InitEngine ob = new InitEngine();
-//        Map<String, String> routes_dict = ob.readRoutesFromCSV("resources/routes.csv");
-//        Map<String, ArrayList<String>> routesToTrips = ob.mapRoutesToTripsFromCSV(routes_dict, "resources/trips.csv");
-//        Map<String, ArrayList<Station>> tripsToStations = ob.parseStationTimesFromCSV("resources/stop_times.csv");
-//        Map<String, ArrayList<Station>> routesToStations = ob.mapRouteToStations(routesToTrips, tripsToStations);
-//        Map<String, ArrayList<Station>> routeIdsToStations = ob.addStationCoordsToRouteStationsMapping(routesToStations, "resources/stops.csv");
-//
-//        ob.createMap(routeIdsToStations, routes_dict);
+        Map<String, String> routeIdsToLineNames = ob.readRoutesFromCSV("resources/routes.csv");
+        Map<String, ArrayList<String>> routesToTrips = ob.mapRoutesToTripsFromCSV(routeIdsToLineNames, "resources/trips.csv");
+        Map<String, ArrayList<Station>> tripsToStations = ob.parseStationTimesFromCSV("resources/stop_times.csv");
+        Map<String, ArrayList<Station>> routesToStations = ob.mapRouteToStations(routesToTrips, tripsToStations);
+        Map<String, ArrayList<Station>> routeIdsToStations = ob.addStationCoordsToRouteStationsMapping(routesToStations, "resources/stops.csv");
+
+        ob.createMap(routeIdsToStations, routeIdsToLineNames);
+
+        Map<String, ArrayList<ScheduleItem>> mapStopsToScheduleItems = ob.mapStopsToScheduleItems("resources/stop_times.csv", routesToTrips, routeIdsToLineNames);
+
+    }
+
+
+    public Map<String, ArrayList<ScheduleItem>> getStopsWithSchedule() {
+        Map<String, String> routeIdsToLineNames = this.readRoutesFromCSV("resources/routes.csv");
+        Map<String, ArrayList<String>> routesToTrips = this.mapRoutesToTripsFromCSV(routeIdsToLineNames, "resources/trips.csv");
+
+        return this.mapStopsToScheduleItems("resources/stop_times.csv", routesToTrips, routeIdsToLineNames);
     }
 
     public common.Map createMapFromBVGFiles() {
@@ -250,11 +263,108 @@ public class InitEngine {
     }
 
 
-    // private ArrayList<String, Map<String, ArrayList<String/Time>>>
-    // Map trip - (station_id, time). tuple as a nested class OR route - (Key: station_id, Value: List<time>)
-    // ArrayList(UserState)
-    // For each randomly start location, 80% go to next random station from your current station.
-    // If any other route contains currentStation then you can switch else stay on the given route.
-    // Probability of termination
+    private Map<String, ArrayList<ScheduleItem>> mapStopsToScheduleItems (String fileName, Map<String, ArrayList<String>> routeIdsToTrips, Map<String, String> routesIdsToLineNames) {
+        Map<String, ArrayList<ScheduleItem>> stopsToScheduleItems = new HashMap<>();
+        Path pathToFile = Paths.get(fileName);
 
+        try (
+                Reader reader = Files.newBufferedReader(pathToFile);
+                CSVReader csvReader = new CSVReader(reader,  ',', '"', 1);
+        ) {
+            String[] nextRecord = csvReader.readNext();
+            String[] nextNextRecord = csvReader.readNext();
+            String line_name = "";
+
+            // Read the first entry in the file
+            if ((nextRecord = csvReader.readNext()) != null) {
+
+                // Read the proceeding entry
+                if ((nextNextRecord = csvReader.readNext()) != null) {
+
+                    // If extracted line_name based on the trip_id, then it's an ubahn line, update stopToScheduleItems mapping
+                    if (!(line_name = getLineNameFromTripId(nextRecord[0], routeIdsToTrips, routesIdsToLineNames)).equals("")) {
+                        stopsToScheduleItems = updateStopsToScheduleItemsMap(stopsToScheduleItems, nextRecord, nextNextRecord, line_name);
+                    }
+
+                    nextRecord = nextNextRecord;
+                }
+            }
+
+            // Try to read the nextNextRecord consecutive to nextRecord
+            while ((nextNextRecord = csvReader.readNext()) != null) {
+
+                // If extracted line_name based on the trip_id, then it's an ubahn line, update stopToScheduleItems mapping
+                if (!(line_name = getLineNameFromTripId(nextRecord[0], routeIdsToTrips, routesIdsToLineNames)).equals("")) {
+                    stopsToScheduleItems = updateStopsToScheduleItemsMap(stopsToScheduleItems, nextRecord, nextNextRecord, line_name);
+                }
+
+                nextRecord = nextNextRecord;
+            }
+        } catch (Exception e) {e.printStackTrace(); }
+
+        return  stopsToScheduleItems;
+    }
+
+
+    private Map<String, ArrayList<ScheduleItem>> updateStopsToScheduleItemsMap (Map<String, ArrayList<ScheduleItem>> stopsToScheduleItems, String[] nextRecord, String[] nextNextRecord, String line_name) {
+
+        // If both entries belong to the same trip [0] and are consecutive in the stop sequence [4],
+        // extract the line name and if U-bahn create an entry in stopsToScheduleItem
+        if (nextRecord[0].equals(nextNextRecord[0]) && Integer.parseInt(nextRecord[4]) + 1 == Integer.parseInt(nextNextRecord[4])) {
+
+            ArrayList<ScheduleItem> tempScheduleItems;
+            String departure_time = nextRecord[2];
+            String stop_id = nextRecord[3];
+            String nextStop_id = nextNextRecord[3];
+
+            // Remove preceeding 0's from stop ids
+            if (stop_id.startsWith("0")) stop_id = stop_id.substring(1, stop_id.length());
+            if (nextStop_id.startsWith("0")) nextStop_id = nextStop_id.substring(1, stop_id.length());
+
+            // If a stop is already in the mapping, extract the ScheduleItems and append a new one
+            if ((tempScheduleItems = stopsToScheduleItems.get(stop_id)) != null) {
+                tempScheduleItems.add(new ScheduleItem(line_name, departure_time, nextStop_id));
+                stopsToScheduleItems.put(stop_id, tempScheduleItems);
+            }
+            // Else create a new entry Key: stop_id, Value: ArrayList<ScheduleItem>
+            else {
+                tempScheduleItems = new ArrayList<>();
+                tempScheduleItems.add(new ScheduleItem(line_name, departure_time, nextStop_id));
+                stopsToScheduleItems.put(stop_id, tempScheduleItems);
+            }
+        }
+
+        return stopsToScheduleItems;
+    }
+
+
+    private String getLineNameFromTripId(String trip_id, Map<String, ArrayList<String>> routeIdsToTrips, Map<String, String> routesIdsToLineNames) {
+        String line_name = "";
+
+        // Check if a given trip_id is included in a list of trips for a given route.
+        // If so extract the line name corresponding to the route_id and set the variable
+        for (String key : routeIdsToTrips.keySet()) {
+            if (routeIdsToTrips.get(key).contains(trip_id)) {
+                line_name = routesIdsToLineNames.get(key);
+                return line_name;
+            }
+        }
+
+        return line_name;
+    }
+
+    public ArrayList<Station> getUBahnStations() {
+        ArrayList<Station> allUBahnStations = new ArrayList();
+        Map<String, String> routes_dict = readRoutesFromCSV("resources/routes.csv");
+        Map<String, ArrayList<String>> routesToTrips = mapRoutesToTripsFromCSV(routes_dict, "resources/trips.csv");
+        Map<String, ArrayList<Station>> tripsToStations = parseStationTimesFromCSV("resources/stop_times.csv");
+        Map<String, ArrayList<Station>> routesToStations = mapRouteToStations(routesToTrips, tripsToStations);
+
+        for (String key : routesToStations.keySet()){
+            ArrayList<Station> stations = routesToStations.get(key);
+            allUBahnStations.addAll(stations);
+        }
+        allUBahnStations = new ArrayList<>(new HashSet<>(allUBahnStations));
+        return allUBahnStations;
+    }
 }
