@@ -20,7 +20,7 @@ public class App {
         Timer timer = new Timer(true);
         VisualizationEngine vis = new VisualizationEngine(Map2GraphConverter.convert(map), states);
 
-        Window window = new Window("Dissemination Simulation", vis.getViewPanel());
+        Window window = new Window("Dissemination Simulation", vis.getViewPanel(), vis);
         window.setVisible(true);
 
         timer.scheduleAtFixedRate(vis, 0, 1000);
