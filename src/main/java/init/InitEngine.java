@@ -5,17 +5,20 @@ import common.GeoCoords;
 import common.Line;
 import common.Station;
 
-import java.io.*;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Time;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class InitEngine {
 
 
-    public InitEngine() {}
+    public InitEngine() {
+    }
 
 
     public static void main(String[] args) {
@@ -30,8 +33,19 @@ public class InitEngine {
 //        ob.createMap(routeIdsToStations, routes_dict);
     }
 
+    public common.Map createMapFromBVGFiles() {
+        Map<String, String> routes_dict = this.readRoutesFromCSV("resources/routes.csv");
+        Map<String, ArrayList<String>> routesToTrips = this.mapRoutesToTripsFromCSV(routes_dict, "resources/trips.csv");
+        Map<String, ArrayList<Station>> tripsToStations = this.parseStationTimesFromCSV("resources/stop_times.csv");
+        Map<String, ArrayList<Station>> routesToStations = this.mapRouteToStations(routesToTrips, tripsToStations);
+        Map<String, ArrayList<Station>> routeIdsToStations = this.addStationCoordsToRouteStationsMapping(routesToStations, "resources/stops.csv");
+
+        return this.createMap(routeIdsToStations, routes_dict);
+    }
+
     /**
      * Parse the CSV file mapping ubahn lines to route identifiers
+     *
      * @param fileName input file "routes.csv"
      * @return Dictionary route_id -> ubahn_line_name
      */
@@ -42,7 +56,7 @@ public class InitEngine {
         try (
                 Reader reader = Files.newBufferedReader(pathToFile);
                 CSVReader csvReader = new CSVReader(reader, ',', '"', 1);
-            ) {
+        ) {
 
             String[] nextRecord;
             while ((nextRecord = csvReader.readNext()) != null) {
@@ -52,15 +66,18 @@ public class InitEngine {
                     routes_dict.put(nextRecord[0], nextRecord[2]);
                 }
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return routes_dict;
     }
 
     /**
      * Create a mapping of route_id to trips at a given route from trips.csv
+     *
      * @param routes_dict Dictionary route_id -> ubahn_line_name
-     * @param fileName path to trips.csv
+     * @param fileName    path to trips.csv
      * @return Hashmap, key:route_id, value: ArrayList<trip_id>
      */
     private Map<String, ArrayList<String>> mapRoutesToTripsFromCSV(Map<String, String> routes_dict, String fileName) {
@@ -90,13 +107,16 @@ public class InitEngine {
                     }
                 }
             }
-        } catch (Exception e) {e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return routesToTrips_dict;
     }
 
     /**
      * Parse stop_times.csv to create a mapping trip_id - ArrayList<station_id>
+     *
      * @param fileName path to stop_times.csv
      * @return mapping trip_id - ArrayList<station_id>
      */
@@ -110,7 +130,7 @@ public class InitEngine {
         ) {
             String[] nextRecord;
             while ((nextRecord = csvReader.readNext()) != null) {
-                try{
+                try {
                     String trip_id = nextRecord[0];
                     long station_id = Long.parseLong(nextRecord[3]);
                     ArrayList<Station> currentStations;
@@ -123,11 +143,13 @@ public class InitEngine {
                     } else {
                         tripsToStations_dict.put(trip_id, new ArrayList<Station>(Arrays.asList(new Station(station_id))));
                     }
-                } catch (NumberFormatException ex){
+                } catch (NumberFormatException ex) {
                     System.out.println("Skipped station with id: " + nextRecord[3]);
                 }
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return tripsToStations_dict;
     }
@@ -136,11 +158,12 @@ public class InitEngine {
     /**
      * Create a mapping of route_id - List<station_id> </station_id>based on the mappings of route_id - List<trip_id>
      * and trip_id - List<station_id>
-     * @param routesToTrips_dict mapping route_id - List<trip_id>
+     *
+     * @param routesToTrips_dict   mapping route_id - List<trip_id>
      * @param tripsToStations_dict mapping trip_id - List<station_id>
      * @return mapping route_id - List<station_id>
      */
-    private Map<String, ArrayList<Station>> mapRouteToStations (Map<String, ArrayList<String>> routesToTrips_dict, Map<String, ArrayList<Station>> tripsToStations_dict) {
+    private Map<String, ArrayList<Station>> mapRouteToStations(Map<String, ArrayList<String>> routesToTrips_dict, Map<String, ArrayList<Station>> tripsToStations_dict) {
         Map<String, ArrayList<Station>> routesToStations = new HashMap<>();
 
         for (String key : routesToTrips_dict.keySet()) {
@@ -166,11 +189,12 @@ public class InitEngine {
     /**
      * Based on the mapping of route_id - List<station_id>, parse the stops.csv and
      * return a mapping of route_id - List<Station> that includes geo coordinates of each station.
+     *
      * @param routesToStations mapping of route_id - List<station_id>
-     * @param fileName path to stops.csv
+     * @param fileName         path to stops.csv
      * @return mapping of route_id - List<Station>
      */
-    private Map<String, ArrayList<Station>> addStationCoordsToRouteStationsMapping (Map<String, ArrayList<Station>> routesToStations, String fileName) {
+    private Map<String, ArrayList<Station>> addStationCoordsToRouteStationsMapping(Map<String, ArrayList<Station>> routesToStations, String fileName) {
         Path pathToFile = Paths.get(fileName);
 
         try (
@@ -179,7 +203,7 @@ public class InitEngine {
         ) {
             String[] nextRecord;
             while ((nextRecord = csvReader.readNext()) != null) {
-                try{
+                try {
                     Double stop_lat = Double.parseDouble(nextRecord[4]);
                     Double stop_lon = Double.parseDouble(nextRecord[5]);
                     String name = nextRecord[2];
@@ -197,21 +221,23 @@ public class InitEngine {
                             }
                         }
                     }
-                } catch (NumberFormatException ex){
+                } catch (NumberFormatException ex) {
                     System.out.println("Skipped station with id: " + nextRecord[0]);
                 }
             }
-        } catch (Exception e) { e.printStackTrace();}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return routesToStations;
     }
 
 
-    private common.Map createMap (Map<String, ArrayList<Station>> routeIdsToStations, Map<String, String> routes_dict) {
+    private common.Map createMap(Map<String, ArrayList<Station>> routeIdsToStations, Map<String, String> routes_dict) {
 
         common.Map map = new common.Map();
         ArrayList<Line> lines = new ArrayList<>();
-        for (String key : routeIdsToStations.keySet()){
+        for (String key : routeIdsToStations.keySet()) {
             String lineName = routes_dict.get(key);
             Line line = new Line();
             line.setName(lineName);
@@ -220,7 +246,7 @@ public class InitEngine {
         }
 
         map.setLines(lines);
-        return  map;
+        return map;
     }
 
 

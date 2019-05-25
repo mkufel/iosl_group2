@@ -24,14 +24,16 @@ public class VisualizationEngine extends TimerTask {
 
     private List<State> states;
 
+    private OnVisualizationStateChangedListener onVisualizationStateChangedListener;
+
     public VisualizationEngine(Graph graph, List<State> states) {
         this.graph = graph;
+        System.setProperty("gs.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 
         this.viewer = new Viewer(this.graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
         this.viewer.disableAutoLayout();
-
+        this.viewer.enableXYZfeedback(true);
         this.viewPanel = this.viewer.addDefaultView(false);
-
         this.spriteManager = new SpriteManager(graph);
         this.states = states;
     }
@@ -64,7 +66,8 @@ public class VisualizationEngine extends TimerTask {
 
     private void drawCurrentState() {
         // Check if state exists
-        if (currentTick > this.states.size() - 1) {
+        if (currentTick > this.states.size() - 1 || currentTick < 0) {
+            this.isRunning = false;
             return;
         }
 
@@ -74,10 +77,17 @@ public class VisualizationEngine extends TimerTask {
             this.drawUserState(userState);
         }
 
+        if (this.onVisualizationStateChangedListener != null) {
+            this.onVisualizationStateChangedListener.onTick(this.currentTick, currentState.getActiveAgents());
+        }
+
     }
 
     private void drawUserState(UserState userState) {
         Sprite sprite = createSpriteIfDoesNotExist(userState);
+        if (sprite == null) {
+            return;
+        }
         String spriteCurrentEdge = sprite.getAttribute("currentEdge");
         String stateCurrentEdge = userState.getEdgeId();
 
@@ -98,6 +108,10 @@ public class VisualizationEngine extends TimerTask {
     private Sprite createSpriteIfDoesNotExist(UserState userState) {
         Sprite sprite = this.spriteManager.getSprite("" + userState.getPersonId());
         if (sprite == null) {
+            if (graph.getEdge(userState.getEdgeId()) == null) {
+                System.out.println("Edge does not exist.");
+                return null;
+            }
             System.out.println("Creating sprite...");
             sprite = this.spriteManager.addSprite("" + userState.getPersonId());
             sprite.attachToEdge(userState.getEdgeId());
@@ -156,5 +170,13 @@ public class VisualizationEngine extends TimerTask {
                 node.removeAttribute("ui.class");
             }
         }
+    }
+
+    public OnVisualizationStateChangedListener getOnVisualizationStateChangedListener() {
+        return onVisualizationStateChangedListener;
+    }
+
+    public void setOnVisualizationStateChangedListener(OnVisualizationStateChangedListener onVisualizationStateChangedListener) {
+        this.onVisualizationStateChangedListener = onVisualizationStateChangedListener;
     }
 }

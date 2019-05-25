@@ -1,6 +1,11 @@
 node {
-    size: 10px;
+    size: 3px;
     fill-color: #000;
+<<<<<<< Updated upstream
+    text-mode: hidden;
+
+=======
+>>>>>>> Stashed changes
 }
 
 node.visited {
@@ -14,6 +19,45 @@ edge {
 }
 
 edge.U1 {
+<<<<<<< Updated upstream
+    fill-color: #55a821;
+}
+
+edge.U2 {
+    fill-color: #ff3400;
+}
+
+edge.U3 {
+    fill-color: #019277;
+}
+
+edge.U4 {
+    fill-color: #fdd700;
+}
+
+edge.U5 {
+    fill-color: #672f17;
+}
+
+edge.U55 {
+    fill-color: #672f17;
+}
+
+edge.U6 {
+    fill-color: #6f4e9c;
+}
+
+edge.U7 {
+    fill-color: #3590c0;
+}
+
+edge.U8 {
+    fill-color: #083c85;
+}
+
+edge.U9 {
+    fill-color: #ff7200;
+=======
     fill-color: #FF0000;
 }
 
@@ -31,11 +75,12 @@ edge.U4 {
 
 edge.U5 {
     fill-color: #5c1fff;
+>>>>>>> Stashed changes
 }
 
 sprite {
     size: 5px;
-    fill-color: #383fff;
+    fill-color: #9eff61;
     text-mode: hidden;
     z-index: 1;
 }
