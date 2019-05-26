@@ -1,5 +1,5 @@
 package TraceGenerationEngine;
 
-public interface ConfigurationChangedCallback {
+public interface ConfigurationChangedListener {
     void onConfigurationChanged(int totalPopulation, int totalTicks);
 }

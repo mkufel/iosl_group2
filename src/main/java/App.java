@@ -4,7 +4,7 @@ import common.Map;
 import common.State;
 import init.InitEngine;
 import visualization.VisualizationEngine;
-import visualization.Window;
+import visualization.VisualizationWindow;
 import visualization.services.Map2GraphConverter;
 import visualization.services.MapFactory;
 import visualization.services.StateFactory;
@@ -30,8 +30,8 @@ public class App {
             Timer timer = new Timer(true);
             VisualizationEngine visualizationEngine = new VisualizationEngine(Map2GraphConverter.convert(berlinMap), statesBerlin);
             visualizationEngine.setRunning(true);
-            Window window = new Window("Dissemination Simulation", visualizationEngine.getViewPanel(), visualizationEngine, engine);
-            window.setVisible(true);
+            VisualizationWindow visualizationWindow = new VisualizationWindow(visualizationEngine.getViewPanel(), visualizationEngine, engine);
+            visualizationWindow.setVisible(true);
 
             timer.scheduleAtFixedRate(visualizationEngine, 0, 1000);
         } catch (IOException e) {

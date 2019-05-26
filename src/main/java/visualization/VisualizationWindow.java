@@ -1,6 +1,6 @@
 package visualization;
 
-import TraceGenerationEngine.ConfigurationChangedCallback;
+import TraceGenerationEngine.ConfigurationChangedListener;
 import TraceGenerationEngine.TraceGenerationEngine;
 import org.graphstream.ui.swingViewer.ViewPanel;
 
@@ -11,11 +11,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class Window extends JFrame {
+public class VisualizationWindow extends JFrame {
 
-    VisualizationEngine visualizationEngine;
-    TraceGenerationEngine traceGenerationEngine;
-    ViewPanel graphView;
+    private VisualizationEngine visualizationEngine;
+    private TraceGenerationEngine traceGenerationEngine;
+    private ViewPanel graphView;
 
     private static class TextIndicator extends JTextField {
         TextIndicator() {
@@ -33,11 +33,28 @@ public class Window extends JFrame {
         }
     }
 
-    public Window(String title, ViewPanel graphView, VisualizationEngine engine, TraceGenerationEngine traceGenerationEngine) throws HeadlessException {
-        super(title);
+    /**
+     * Initializes the Window for the visualization.
+     * @param graphView The graph object to show.
+     * @param engine The visualization engine that is runnning the simulation.
+     * @param traceGenerationEngine The trace generation engine that loads configurations.
+     * @throws HeadlessException
+     */
+    public VisualizationWindow(ViewPanel graphView,
+                               VisualizationEngine engine,
+                               TraceGenerationEngine traceGenerationEngine) throws HeadlessException {
+        super("Dissemination Visualization");
         this.visualizationEngine = engine;
         this.traceGenerationEngine = traceGenerationEngine;
         this.graphView = graphView;
+        setDefaultWindowConfigurations(graphView);
+    }
+
+    /**
+     * Sets up default settings for the View.
+     * @param graphView The Panel object that contains the GraphStream Graph.
+     */
+    private void setDefaultWindowConfigurations(ViewPanel graphView) {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         this.setJMenuBar(this.createMenuBar());
@@ -46,37 +63,18 @@ public class Window extends JFrame {
         graphView.setPreferredSize(new Dimension(800, 600));
         graphView.resizeFrame(800, 600);
         this.getContentPane().add(graphView, BorderLayout.CENTER);
-
-
-/*
-        ((Component) graphView).addMouseWheelListener(new MouseWheelListener() {
-            @Override
-            public void mouseWheelMoved(MouseWheelEvent e) {
-                e.consume();
-                System.out.println(e.toString());
-                int i = 2;
-                double factor = Math.pow(1.25, i);
-                Camera cam = graphView.getCamera();
-                double zoom = cam.getViewPercent() * factor;
-                Point2 pxCenter = cam.transformGuToPx(cam.getViewCenter().x, cam.getViewCenter().y, 0);
-                Point3 guClicked = cam.transformPxToGu(e.getX(), e.getY());
-                double newRatioPx2Gu = cam.getMetrics().ratioPx2Gu / factor;
-                double x = guClicked.x + (pxCenter.x - e.getX()) / newRatioPx2Gu;
-                double y = guClicked.y - (pxCenter.y - e.getY()) / newRatioPx2Gu;
-                cam.setViewCenter(x, y, 0);
-                cam.setViewPercent(zoom);
-            }
-        });*/
         this.pack();
+
     }
 
+    /**
+     * Sets up the menu in the Window.
+     * @return The JMenuBar object set up.
+     */
     private JMenuBar createMenuBar() {
         JMenuBar menu = new JMenuBar();
-
         JMenu menuFile = createFileMenu();
-
         JMenu menuEdit = createEditMenu();
-
         JMenu menuHelp = createHelpMenu();
 
         menu.add(menuFile);
@@ -86,18 +84,25 @@ public class Window extends JFrame {
         return menu;
     }
 
+    /**
+     * Sets up the Help menu.
+     * @return The JMenu object.
+     */
     private JMenu createHelpMenu() {
         JMenu menuHelp = new JMenu("Help");
         menuHelp.add(new JMenuItem("About"));
         return menuHelp;
     }
 
+    /**
+     * Sets up and adds listeners to the Edit menu.
+     * @return The JMenu object.
+     */
     private JMenu createEditMenu() {
         JMenu menuEdit = new JMenu("Edit");
         menuEdit.add(new JMenuItem("Pause/Resume")).addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
                 visualizationEngine.toggleSimulation();
             }
         });
@@ -119,7 +124,6 @@ public class Window extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 graphView.getCamera().resetView();
-
                 visualizationEngine.restart();
             }
         });
@@ -132,6 +136,10 @@ public class Window extends JFrame {
         return menuEdit;
     }
 
+    /**
+     * Sets up the File menu and adds listeners.
+     * @return The JMenu object.
+     */
     private JMenu createFileMenu() {
         JMenu menuFile = new JMenu("File");
         menuFile.add(new JMenuItem("Open"));
@@ -142,6 +150,10 @@ public class Window extends JFrame {
         return menuFile;
     }
 
+    /**
+     * Creates the Toolbar in the window, sets up listeners.
+     * @return The JToolBar object.
+     */
     private JToolBar createToolBar() {
         JToolBar tools = new JToolBar();
 
@@ -155,7 +167,7 @@ public class Window extends JFrame {
 
         JSlider sliderTick = new JSlider(SwingConstants.HORIZONTAL);
         sliderTick.setValue(0);
-        traceGenerationEngine.setConfigurationChangedCallback(new ConfigurationChangedCallback() {
+        traceGenerationEngine.setConfigurationChangedListener(new ConfigurationChangedListener() {
             @Override
             public void onConfigurationChanged(int totalPopulation, int totalTicks) {
                 fieldSimulatedPopulation.setText(Integer.toString(totalPopulation));

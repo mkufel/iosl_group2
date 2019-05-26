@@ -21,7 +21,7 @@ public class TraceGenerationEngine {
     int total_users;
     int total_ticks;
 
-    ConfigurationChangedCallback configurationChangedCallback;
+    ConfigurationChangedListener configurationChangedListener;
 
     public static void main(String[] args) throws IOException {
 //        InitEngine initEngine = new InitEngine();
@@ -98,8 +98,8 @@ public class TraceGenerationEngine {
         total_users = Integer.parseInt(_getConfigValue("total_users"));
         total_ticks = Integer.parseInt(_getConfigValue("total_ticks"));
 
-        if (this.configurationChangedCallback != null) {
-            this.configurationChangedCallback.onConfigurationChanged(total_users, total_ticks);
+        if (this.configurationChangedListener != null) {
+            this.configurationChangedListener.onConfigurationChanged(total_users, total_ticks);
         }
 
     }
@@ -133,11 +133,11 @@ public class TraceGenerationEngine {
         return this.allUBahnStations.get(0);
     }
 
-    public ConfigurationChangedCallback getConfigurationChangedCallback() {
-        return configurationChangedCallback;
+    public ConfigurationChangedListener getConfigurationChangedListener() {
+        return configurationChangedListener;
     }
 
-    public void setConfigurationChangedCallback(ConfigurationChangedCallback configurationChangedCallback) {
-        this.configurationChangedCallback = configurationChangedCallback;
+    public void setConfigurationChangedListener(ConfigurationChangedListener configurationChangedListener) {
+        this.configurationChangedListener = configurationChangedListener;
     }
 }
