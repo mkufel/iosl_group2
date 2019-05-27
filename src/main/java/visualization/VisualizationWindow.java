@@ -1,15 +1,10 @@
 package visualization;
 
-import TraceGenerationEngine.ConfigurationChangedListener;
 import TraceGenerationEngine.TraceGenerationEngine;
 import org.graphstream.ui.swingViewer.ViewPanel;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class VisualizationWindow extends JFrame {
 
@@ -38,7 +33,6 @@ public class VisualizationWindow extends JFrame {
      * @param graphView The graph object to show.
      * @param engine The visualization engine that is runnning the simulation.
      * @param traceGenerationEngine The trace generation engine that loads configurations.
-     * @throws HeadlessException
      */
     public VisualizationWindow(ViewPanel graphView,
                                VisualizationEngine engine,
@@ -59,12 +53,12 @@ public class VisualizationWindow extends JFrame {
 
         this.setJMenuBar(this.createMenuBar());
         this.getContentPane().add(this.createToolBar(), BorderLayout.NORTH);
+        this.getContentPane().add(graphView, BorderLayout.CENTER);
 
         graphView.setPreferredSize(new Dimension(800, 600));
         graphView.resizeFrame(800, 600);
-        this.getContentPane().add(graphView, BorderLayout.CENTER);
-        this.pack();
 
+        this.pack();
     }
 
     /**
@@ -90,7 +84,9 @@ public class VisualizationWindow extends JFrame {
      */
     private JMenu createHelpMenu() {
         JMenu menuHelp = new JMenu("Help");
+
         menuHelp.add(new JMenuItem("About"));
+
         return menuHelp;
     }
 
@@ -100,39 +96,27 @@ public class VisualizationWindow extends JFrame {
      */
     private JMenu createEditMenu() {
         JMenu menuEdit = new JMenu("Edit");
-        menuEdit.add(new JMenuItem("Pause/Resume")).addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                visualizationEngine.toggleSimulation();
-            }
-        });
-        menuEdit.add(new JMenuItem("Step back")).addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // graphView.getCamera().setGraphViewport();
-                visualizationEngine.setCurrentTick(visualizationEngine.getCurrentTick() - 1);
-            }
-        });
-        menuEdit.add(new JMenuItem("Step forward")).addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                visualizationEngine.setCurrentTick(visualizationEngine.getCurrentTick() + 1);
-            }
-        });
+
+        menuEdit.add(new JMenuItem("Pause/Resume"))
+                .addActionListener(e -> visualizationEngine.toggleSimulation());
+
+        menuEdit.add(new JMenuItem("Step back"))
+                .addActionListener(e -> visualizationEngine.setCurrentTick(visualizationEngine.getCurrentTick() - 1));
+
+        menuEdit.add(new JMenuItem("Step forward"))
+                .addActionListener(e -> visualizationEngine.setCurrentTick(visualizationEngine.getCurrentTick() + 1));
+
         menuEdit.add(new JSeparator());
-        menuEdit.add(new JMenuItem("Restart visualization")).addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                graphView.getCamera().resetView();
-                visualizationEngine.restart();
-            }
+
+        menuEdit.add(new JMenuItem("Reload simulation"))
+                .addActionListener(e -> System.out.println("Reload pressed."));
+
+        menuEdit.add(new JMenuItem("Restart visualization"))
+                .addActionListener(e -> {
+            graphView.getCamera().resetView();
+            visualizationEngine.restart();
         });
-        menuEdit.add(new JMenuItem("Reload simulation")).addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Reload pressed.");
-            }
-        });
+
         return menuEdit;
     }
 
@@ -142,11 +126,13 @@ public class VisualizationWindow extends JFrame {
      */
     private JMenu createFileMenu() {
         JMenu menuFile = new JMenu("File");
+
         menuFile.add(new JMenuItem("Open"));
         menuFile.add(new JMenuItem("Save as..."));
         menuFile.add(new JSeparator());
         menuFile.add(new JMenuItem("Settings"));
         menuFile.add(new JMenuItem("Exit"));
+
         return menuFile;
     }
 
@@ -167,21 +153,15 @@ public class VisualizationWindow extends JFrame {
 
         JSlider sliderTick = new JSlider(SwingConstants.HORIZONTAL);
         sliderTick.setValue(0);
-        traceGenerationEngine.setConfigurationChangedListener(new ConfigurationChangedListener() {
-            @Override
-            public void onConfigurationChanged(int totalPopulation, int totalTicks) {
-                fieldSimulatedPopulation.setText(Integer.toString(totalPopulation));
-                sliderTick.setMaximum(totalTicks);
-                sliderTick.setMinimum(0);
-            }
+        traceGenerationEngine.setConfigurationChangedListener((totalPopulation, totalTicks) -> {
+            fieldSimulatedPopulation.setText(Integer.toString(totalPopulation));
+            sliderTick.setMaximum(totalTicks);
+            sliderTick.setMinimum(0);
         });
 
-        sliderTick.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                int tickSelected = sliderTick.getValue();
-                visualizationEngine.setCurrentTick(tickSelected);
-            }
+        sliderTick.addChangeListener(e -> {
+            int tickSelected = sliderTick.getValue();
+            visualizationEngine.setCurrentTick(tickSelected);
         });
 
         JLabel labelActiveAgents = new JLabel("Active agents");
@@ -192,32 +172,20 @@ public class VisualizationWindow extends JFrame {
         TextIndicator fieldTick = new TextIndicator();
         fieldTick.setText("0");
 
-        visualizationEngine.setOnVisualizationStateChangedListener(new OnVisualizationStateChangedListener() {
-            @Override
-            public void onTick(int tick, int activeAgents) {
-                fieldTick.setText(Integer.toString(tick));
-                fieldActiveAgents.setText(Integer.toString(activeAgents));
-            }
+        visualizationEngine.setOnVisualizationStateChangedListener((tick, activeAgents) -> {
+            fieldTick.setText(Integer.toString(tick));
+            fieldActiveAgents.setText(Integer.toString(activeAgents));
         });
 
         Button buttonTickPrev = new Button("-");
         buttonTickPrev.setPreferredSize(new Dimension(25, 25));
+        buttonTickPrev.addActionListener(e ->
+                visualizationEngine.setCurrentTick(visualizationEngine.getCurrentTick() - 1));
 
-        buttonTickPrev.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                visualizationEngine.setCurrentTick(visualizationEngine.getCurrentTick() - 1);
-            }
-        });
         Button buttonTickNext = new Button("+");
         buttonTickNext.setPreferredSize(new Dimension(25, 25));
-
-        buttonTickNext.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                visualizationEngine.setCurrentTick(visualizationEngine.getCurrentTick() + 1);
-            }
-        });
+        buttonTickNext.addActionListener(e ->
+                visualizationEngine.setCurrentTick(visualizationEngine.getCurrentTick() + 1));
 
         tools.add(labelSimulatedPopulation);
         tools.add(fieldSimulatedPopulation);
@@ -234,5 +202,4 @@ public class VisualizationWindow extends JFrame {
 
         return tools;
     }
-
 }

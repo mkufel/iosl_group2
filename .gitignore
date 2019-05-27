@@ -2,7 +2,9 @@
 .idea
 *.iml
 
-# Compiled class file
+# Build
+target
+out
 *.class
 
 # Log file

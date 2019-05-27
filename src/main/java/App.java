@@ -6,8 +6,6 @@ import init.InitEngine;
 import visualization.VisualizationEngine;
 import visualization.VisualizationWindow;
 import visualization.services.Map2GraphConverter;
-import visualization.services.MapFactory;
-import visualization.services.StateFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -18,26 +16,23 @@ public class App {
     public static void main(String[] argv) {
         System.setProperty("gs.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 
+        Timer timer = new Timer(true);
 
-        InitEngine initEngine = new InitEngine();
-        Map berlinMap = initEngine.createMapFromBVGFiles();
+        Map berlinMap = new InitEngine().createMapFromBVGFiles();
 
-        Map map = MapFactory.createMap();
-        List<State> states = StateFactory.createStates();
         try {
             TraceGenerationEngine engine = new TraceGenerationEngine();
-            List<State> statesBerlin = engine.getStates();
-            Timer timer = new Timer(true);
+            List<State> statesBerlin = new TraceGenerationEngine().getStates();
+
             VisualizationEngine visualizationEngine = new VisualizationEngine(Map2GraphConverter.convert(berlinMap), statesBerlin);
-            visualizationEngine.setRunning(true);
             VisualizationWindow visualizationWindow = new VisualizationWindow(visualizationEngine.getViewPanel(), visualizationEngine, engine);
+
+            visualizationEngine.setRunning(true);
             visualizationWindow.setVisible(true);
 
             timer.scheduleAtFixedRate(visualizationEngine, 0, 1000);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 }

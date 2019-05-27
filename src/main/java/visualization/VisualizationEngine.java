@@ -34,7 +34,6 @@ public class VisualizationEngine extends TimerTask {
      */
     public VisualizationEngine(Graph graph, List<State> states) {
         this.graph = graph;
-        System.setProperty("gs.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 
         this.viewer = new Viewer(this.graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
         this.viewer.disableAutoLayout();
@@ -168,8 +167,6 @@ public class VisualizationEngine extends TimerTask {
 
     /**
      * Returns the current tick in the visualization.
-     *
-     * @return
      */
     public int getCurrentTick() {
         return currentTick;
@@ -191,8 +188,6 @@ public class VisualizationEngine extends TimerTask {
 
     /**
      * Returns whether the simulation is running.
-     *
-     * @return
      */
     public boolean isRunning() {
         return isRunning;
@@ -200,8 +195,6 @@ public class VisualizationEngine extends TimerTask {
 
     /**
      * Sets the simulation to run or not.
-     *
-     * @param running
      */
     public void setRunning(boolean running) {
         isRunning = running;
@@ -209,8 +202,6 @@ public class VisualizationEngine extends TimerTask {
 
     /**
      * Returns the listener for Visualization state changes.
-     *
-     * @return
      */
     public OnVisualizationStateChangedListener getOnVisualizationStateChangedListener() {
         return onVisualizationStateChangedListener;
