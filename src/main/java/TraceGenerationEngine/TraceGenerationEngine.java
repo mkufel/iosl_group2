@@ -20,12 +20,8 @@ public class TraceGenerationEngine {
     ArrayList<Station> allUBahnStations;
     Map<String, ArrayList<ScheduleItem>> stopsWithSchedule;
     public static void main(String[] args) throws IOException {
-//        InitEngine initEngine = new InitEngine();
         TraceGenerationEngine tce = new TraceGenerationEngine();
-//        System.out.println(tce.getStates());
         System.out.println(tce.getStates());
-//        Object a = initEngine.getStopsWithSchedule();
-//        System.out.println(a);
     }
 
     public TraceGenerationEngine() {
@@ -71,24 +67,80 @@ public class TraceGenerationEngine {
         for (int i = 0; i < total_users; i++) {
             System.out.println("Generating state for user id: " + i);
             int startTick = rand.nextInt(total_ticks);
-            Station startStation = getStartStation();
-            Long endStation = null;
-            int totalStops = 5 + rand.nextInt(11);
+
+            Long startStation = getStartStation().getId();
+            Long endStation = startStation;
+
+            int TOTAL_STOPS = 5 + rand.nextInt(11);
             State state;
-            for (int tick = startTick; tick < startTick + totalStops; tick++) {
-                if (tick >= total_ticks) {
-                    break;
-                }
+            Double progress = 0.0;
+            String lineName = "";
+            for (int tick = startTick; (tick < startTick + TOTAL_STOPS) && (tick < total_ticks); tick++) {
                 state = states.get(tick);
-                if(this.stopsWithSchedule.get(Long.toString(startStation.getId())) != null) {
-                    ScheduleItem someScheduleItem = (this.stopsWithSchedule.get(Long.toString(startStation.getId()))).get(0);
-                    endStation = Long.parseLong(someScheduleItem.getNextStop_id());
-                    UserState userState = new UserState(i, startStation.getId(), endStation, "U?", (double)(tick - startTick)/totalStops, false);
+
+                //User is inside a train
+                if (progress > 0.0) {
+                    UserState userState = new UserState(i, startStation, endStation, lineName, progress, false);
                     state.addUserState(userState);
+                    progress += 0.2; //TODO: calculate progress based on length of leg
+                } else { //User is at a station
+                    ArrayList<ScheduleItem> scheduleFromStartStation = this.stopsWithSchedule.get(Long.toString(startStation));
+                    if(scheduleFromStartStation != null) {
+                        ScheduleItem nextScheduleItem = getNextScheduleItem(scheduleFromStartStation, tick, startStation);
+                        //Found a train in the next 5 minutes
+                        if (nextScheduleItem != null && nextScheduleItem.getNextStop_id() != null) {
+                            endStation = Long.parseLong(nextScheduleItem.getNextStop_id());
+                            lineName = nextScheduleItem.getLine_name();
+                        }
+                        UserState userState = new UserState(i, startStation, endStation, lineName, progress, false);
+                        state.addUserState(userState);
+                        progress += 0.2; //TODO: calculate progress based on length of leg
+                    }
+                }
+
+                // User has reached a station
+                if (progress >= 1.0) {
+                    progress = 0.0;
+                    startStation = endStation;
                 }
             }
         }
         return states;
+    }
+
+    private ScheduleItem getNextScheduleItem(ArrayList<ScheduleItem> scheduleItems, int tick, Long currentStation) throws IOException {
+        String startTime = this._getConfigValue("start_time");
+        int currentTime = getAbsoluteTimeFromTick(startTime, tick);
+        ArrayList<ScheduleItem> scheduleItemsToBeConsidered= new ArrayList<>();
+        for (ScheduleItem scheduleItem: scheduleItems) {
+            String dt = scheduleItem.getDeparture_time();
+            String[] components = dt.split(":");
+            int departureTimeInSeconds = Integer.parseInt(components[0])*60*60
+                                            + Integer.parseInt(components[1])*60
+                                            + Integer.parseInt(components[2]);
+            if (departureTimeInSeconds > currentTime && departureTimeInSeconds - currentTime < 10*60) {
+                scheduleItemsToBeConsidered.add(scheduleItem);
+            }
+        }
+        if (scheduleItemsToBeConsidered.size() == 0) {
+            return null;
+        }
+        Random rand = new Random();
+
+        int randNum = rand.nextInt(scheduleItemsToBeConsidered.size());
+
+
+        return scheduleItemsToBeConsidered.get(randNum);
+    }
+
+    private int getAbsoluteTimeFromTick(String startTime, int tick) throws IOException {
+        //Each tick is 30 seconds
+        int timeElapsedSinceStart = tick * 30;
+        return Integer.parseInt(startTime) * 60 * 60 + timeElapsedSinceStart;
+//        int hours = currentTime/(60*60);
+//        int minutes = (currentTime - (hours * 60 * 60))/60;
+//        int seconds = (currentTime - (minutes * 60));
+//        return String.format("%d:%d:%d", hours, minutes, seconds);
     }
 
     private Station getStartStation() throws IOException {
