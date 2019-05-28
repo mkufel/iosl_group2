@@ -1,6 +1,5 @@
 package TraceGenerationEngine;
 
-import com.sun.deploy.trace.Trace;
 import common.ScheduleItem;
 import common.State;
 import common.Station;
@@ -19,6 +18,11 @@ public class TraceGenerationEngine {
     InitEngine initEngine;
     ArrayList<Station> allUBahnStations;
     Map<String, ArrayList<ScheduleItem>> stopsWithSchedule;
+    int total_users;
+    int total_ticks;
+
+    ConfigurationChangedListener configurationChangedListener;
+
     public static void main(String[] args) throws IOException {
         TraceGenerationEngine tce = new TraceGenerationEngine();
         System.out.println(tce.getStates());
@@ -54,12 +58,11 @@ public class TraceGenerationEngine {
     }
 
     public ArrayList<State> getStates() throws IOException {
-        ArrayList<State> states= new ArrayList<State>();
-        int total_users = Integer.parseInt(_getConfigValue("total_users"));
-        int total_ticks = Integer.parseInt(_getConfigValue("total_ticks"));
+        ArrayList<State> states = new ArrayList<State>();
+        loadInitialPopulationValues();
 
         //initialise empty states
-        for (int i=0; i < total_ticks; i++) {
+        for (int i = 0; i < total_ticks; i++) {
             states.add(new State(i, new ArrayList<>()));
         }
         Random rand = new Random();
@@ -137,17 +140,26 @@ public class TraceGenerationEngine {
         //Each tick is 30 seconds
         int timeElapsedSinceStart = tick * 30;
         return Integer.parseInt(startTime) * 60 * 60 + timeElapsedSinceStart;
+    }
 //        int hours = currentTime/(60*60);
 //        int minutes = (currentTime - (hours * 60 * 60))/60;
 //        int seconds = (currentTime - (minutes * 60));
 //        return String.format("%d:%d:%d", hours, minutes, seconds);
+    private void loadInitialPopulationValues() throws IOException {
+        total_users = Integer.parseInt(_getConfigValue("total_users"));
+        total_ticks = Integer.parseInt(_getConfigValue("total_ticks"));
+
+        if (this.configurationChangedListener != null) {
+            this.configurationChangedListener.onConfigurationChanged(total_users, total_ticks);
+        }
+
     }
 
     private Station getStartStation() throws IOException {
         ArrayList<Long> station_ids = new ArrayList<>();
         ArrayList<Double> popularities = new ArrayList<>();
         Double totalProbabilityCovered = 0.0;
-        for(Station s:this.allUBahnStations) {
+        for (Station s : this.allUBahnStations) {
             Double station_popularity = Double.parseDouble(_getConfigValue("station." + s.getId()));
             if (station_popularity != null) {
                 station_ids.add(s.getId());
@@ -159,9 +171,9 @@ public class TraceGenerationEngine {
         Random rand = new Random();
 
         Double randNum = rand.nextDouble() * totalProbabilityCovered;
-        for (int i=0; i<popularities.size() - 1; i++) {
-            if(popularities.get(i) <= randNum && popularities.get(i+1) > randNum ) {
-                int index =  this.allUBahnStations.indexOf(new Station(station_ids.get(i)));
+        for (int i = 0; i < popularities.size() - 1; i++) {
+            if (popularities.get(i) <= randNum && popularities.get(i + 1) > randNum) {
+                int index = this.allUBahnStations.indexOf(new Station(station_ids.get(i)));
                 if (index > -1) {
                     return this.allUBahnStations.get(index);
                 } else {
@@ -170,5 +182,13 @@ public class TraceGenerationEngine {
             }
         }
         return this.allUBahnStations.get(0);
+    }
+
+    public ConfigurationChangedListener getConfigurationChangedListener() {
+        return configurationChangedListener;
+    }
+
+    public void setConfigurationChangedListener(ConfigurationChangedListener configurationChangedListener) {
+        this.configurationChangedListener = configurationChangedListener;
     }
 }

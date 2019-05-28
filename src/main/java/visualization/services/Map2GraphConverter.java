@@ -8,7 +8,6 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
-import org.graphstream.ui.view.Viewer;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +25,7 @@ public class Map2GraphConverter {
         try {
             String stylesheet = readFile();
             graph.addAttribute("ui.stylesheet", stylesheet);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -59,6 +57,7 @@ public class Map2GraphConverter {
         return graph;
     }
 
+
     private static void addEdgeToGraphIfDoesNotExist(Graph graph, Station startStation, Station endStation, Node startNode, Node nextStationNode, String lineName) {
         // Connect stations with an edge
         String edgeId = startStation.getId() < endStation.getId() ? startStation.getId() + "_" + endStation.getId()
@@ -85,7 +84,8 @@ public class Map2GraphConverter {
         return stationNode;
     }
 
-    private static String readFile() throws IOException {
+
+    public static String readFile() throws IOException {
         System.out.println("Working Directory = " +
                 System.getProperty("user.dir"));
         File file = new File("src/main/resources/map-styles.css");

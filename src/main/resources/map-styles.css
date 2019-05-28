@@ -1,5 +1,5 @@
 node {
-    size: 10px;
+    size: 3px;
     fill-color: #000;
 }
 
@@ -14,28 +14,49 @@ edge {
 }
 
 edge.U1 {
-    fill-color: #FF0000;
+
+    fill-color: #55a821;
 }
 
 edge.U2 {
-    fill-color: #ffa924;
+    fill-color: #ff3400;
 }
 
 edge.U3 {
-    fill-color: #57ff74;
+    fill-color: #019277;
 }
 
 edge.U4 {
-    fill-color: #2cd3ff;
+    fill-color: #fdd700;
 }
 
 edge.U5 {
-    fill-color: #5c1fff;
+    fill-color: #672f17;
+}
+
+edge.U55 {
+    fill-color: #672f17;
+}
+
+edge.U6 {
+    fill-color: #6f4e9c;
+}
+
+edge.U7 {
+    fill-color: #3590c0;
+}
+
+edge.U8 {
+    fill-color: #083c85;
+}
+
+edge.U9 {
+    fill-color: #ff7200;
 }
 
 sprite {
     size: 5px;
-    fill-color: #383fff;
+    fill-color: #ff39e5;
     text-mode: hidden;
     z-index: 1;
 }

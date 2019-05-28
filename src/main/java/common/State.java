@@ -7,13 +7,13 @@ public class State {
 
     private List<UserState> userStates;
 
-    public State(int tick) {
-        this.tick = tick;
-    }
+    private int activeAgents = 0;
 
-    public State(int tick, List<UserState> userStates) {
+    public State(int tick, List<UserState> users) {
         this.tick = tick;
-        this.userStates = userStates;
+        this.userStates = users;
+        this.activeAgents = this.userStates.stream()
+                .reduce(0, (totalActive, user) -> totalActive + (user.isData() ? 1 : 0), Integer::sum);
     }
 
     public int getTick() {
@@ -34,5 +34,13 @@ public class State {
 
     public void addUserState(UserState userState) {
         this.userStates.add(userState);
+    }
+
+    public int getActiveAgents() {
+        return activeAgents;
+    }
+
+    public void setActiveAgents(int activeAgents) {
+        this.activeAgents = activeAgents;
     }
 }
