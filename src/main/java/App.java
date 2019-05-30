@@ -22,7 +22,7 @@ public class App {
 
         try {
             TraceGenerationEngine engine = new TraceGenerationEngine();
-            List<State> statesBerlin = new TraceGenerationEngine().getStates();
+            List<State> statesBerlin = engine.getStates();
 
             VisualizationEngine visualizationEngine = new VisualizationEngine(Map2GraphConverter.convert(berlinMap), statesBerlin);
             VisualizationWindow visualizationWindow = new VisualizationWindow(visualizationEngine.getViewPanel(), visualizationEngine, engine);

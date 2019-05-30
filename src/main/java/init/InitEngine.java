@@ -14,43 +14,63 @@ import java.util.*;
 
 public class InitEngine {
 
+    Map<String, String> routeIdsToLineNames;
+    Map<String, ArrayList<String>> routesToTrips;
+    Map<String, ArrayList<ScheduleItem>> stopsToScheduleItems;
+    Map<String, ArrayList<Station>> routesToStations;
 
     public InitEngine() {
     }
 
-
-    public static void main(String[] args) {
-
-        InitEngine ob = new InitEngine();
-        Map<String, String> routeIdsToLineNames = ob.readRoutesFromCSV("resources/routes.csv");
-        Map<String, ArrayList<String>> routesToTrips = ob.mapRoutesToTripsFromCSV(routeIdsToLineNames, "resources/trips.csv");
-        Map<String, ArrayList<Station>> tripsToStations = ob.parseStationTimesFromCSV("resources/stop_times.csv");
-        Map<String, ArrayList<Station>> routesToStations = ob.mapRouteToStations(routesToTrips, tripsToStations);
-        Map<String, ArrayList<Station>> routeIdsToStations = ob.addStationCoordsToRouteStationsMapping(routesToStations, "resources/stops.csv");
-
-        ob.createMap(routeIdsToStations, routeIdsToLineNames);
-
-        Map<String, ArrayList<ScheduleItem>> mapStopsToScheduleItems = ob.mapStopsToScheduleItems("resources/stop_times.csv", routesToTrips, routeIdsToLineNames);
-
-    }
-
-
+    /**
+     * If mapping routeIdsToLineNames doesn't exist, parses routes.csv and creates the mapping
+     * If mapping routesToTrips doesn't exist, parses routes.csv and creates the mapping
+     * Creates a mapping of stopIds to a list of their ScheduleItems (all trains leaving from the station)
+     * @return Mapping stopId - ScheduleItem[]
+     */
     public Map<String, ArrayList<ScheduleItem>> getStopsWithSchedule() {
-        Map<String, String> routeIdsToLineNames = this.readRoutesFromCSV("resources/routes.csv");
-        Map<String, ArrayList<String>> routesToTrips = this.mapRoutesToTripsFromCSV(routeIdsToLineNames, "resources/trips.csv");
+        System.out.println("Parsing stops with their schedules...");
 
-        return this.mapStopsToScheduleItems("resources/stop_times.csv", routesToTrips, routeIdsToLineNames);
+        if (routeIdsToLineNames == null) routeIdsToLineNames = this.readRoutesFromCSV("resources/routes.csv");
+        if (routesToTrips == null) routesToTrips = this.mapRoutesToTripsFromCSV(routeIdsToLineNames, "resources/trips.csv");
+        if (stopsToScheduleItems == null) stopsToScheduleItems = this.mapStopsToScheduleItems("resources/stop_times.csv", routesToTrips, routeIdsToLineNames);
+
+        return stopsToScheduleItems;
     }
+
+    /**
+     * From mappings routes - trips and trips - stations, create a mapping routes - stations.
+     * Then use the mapping of routeId - routeName to extract line names.
+     * Finally, create a list of all Stations (line names used as parameters).
+     * @return List of Stations
+     */
+    public ArrayList<Station> getUBahnStations() {
+        System.out.println("Parsing U-Bahn stations...");
+        ArrayList<Station> allUBahnStations = new ArrayList();
+        if (routeIdsToLineNames == null) routeIdsToLineNames = readRoutesFromCSV("resources/routes.csv");
+        if (routesToTrips == null) routesToTrips = mapRoutesToTripsFromCSV(routeIdsToLineNames, "resources/trips.csv");
+        Map<String, ArrayList<Station>> tripsToStations = parseStationTimesFromCSV("resources/stop_times.csv");
+        if (routesToStations == null) routesToStations = mapRouteToStations(routesToTrips, tripsToStations);
+
+        for (String key : routesToStations.keySet()) {
+            ArrayList<Station> stations = routesToStations.get(key);
+            allUBahnStations.addAll(stations);
+        }
+        allUBahnStations = new ArrayList<>(new HashSet<>(allUBahnStations));
+        return allUBahnStations;
+    }
+
 
     public common.Map createMapFromBVGFiles() {
         Map<String, String> routes_dict = this.readRoutesFromCSV("resources/routes.csv");
         Map<String, ArrayList<String>> routesToTrips = this.mapRoutesToTripsFromCSV(routes_dict, "resources/trips.csv");
         Map<String, ArrayList<Station>> tripsToStations = this.parseStationTimesFromCSV("resources/stop_times.csv");
-        Map<String, ArrayList<Station>> routesToStations = this.mapRouteToStations(routesToTrips, tripsToStations);
+        if (routesToStations == null) routesToStations = this.mapRouteToStations(routesToTrips, tripsToStations);
         Map<String, ArrayList<Station>> routeIdsToStations = this.addStationCoordsToRouteStationsMapping(routesToStations, "resources/stops.csv");
 
         return this.createMap(routeIdsToStations, routes_dict);
     }
+
 
     /**
      * Parse the CSV file mapping ubahn lines to route identifiers
@@ -81,6 +101,7 @@ public class InitEngine {
 
         return routes_dict;
     }
+
 
     /**
      * Create a mapping of route_id to trips at a given route from trips.csv
@@ -122,6 +143,7 @@ public class InitEngine {
 
         return routesToTrips_dict;
     }
+
 
     /**
      * Parse stop_times.csv to create a mapping trip_id - ArrayList<station_id>
@@ -195,6 +217,7 @@ public class InitEngine {
         return routesToStations;
     }
 
+
     /**
      * Based on the mapping of route_id - List<station_id>, parse the stops.csv and
      * return a mapping of route_id - List<Station> that includes geo coordinates of each station.
@@ -242,8 +265,14 @@ public class InitEngine {
     }
 
 
+    /**
+     * Creates a List of lines based on the mapping routesIdsToStations, extracts names of u-bahn lines based on
+     * their identifier and instantiates Line objects for each U-bahn line. Then adds all lines to a Map and returns it.
+     * @param routeIdsToStations Mapping of routeIds to StationIds
+     * @param routes_dict Mapping of routeIds to route names
+     * @return Map object containing all U-bahn lines.
+     */
     private common.Map createMap(Map<String, ArrayList<Station>> routeIdsToStations, Map<String, String> routes_dict) {
-
         common.Map map = new common.Map();
         ArrayList<Line> lines = new ArrayList<>();
         for (String key : routeIdsToStations.keySet()) {
@@ -336,6 +365,13 @@ public class InitEngine {
     }
 
 
+    /**
+     * Returns a name of an U-bahn line that serves a given trip
+     * @param trip_id
+     * @param routeIdsToTrips Mapping of routeIds to TripIds
+     * @param routesIdsToLineNames Mapping of routeIds to line names
+     * @return String U-bahn name corresponding to trip_id
+     */
     private String getLineNameFromTripId(String trip_id, Map<String, ArrayList<String>> routeIdsToTrips, Map<String, String> routesIdsToLineNames) {
         String line_name = "";
 
@@ -349,20 +385,5 @@ public class InitEngine {
         }
 
         return line_name;
-    }
-
-    public ArrayList<Station> getUBahnStations() {
-        ArrayList<Station> allUBahnStations = new ArrayList();
-        Map<String, String> routes_dict = readRoutesFromCSV("resources/routes.csv");
-        Map<String, ArrayList<String>> routesToTrips = mapRoutesToTripsFromCSV(routes_dict, "resources/trips.csv");
-        Map<String, ArrayList<Station>> tripsToStations = parseStationTimesFromCSV("resources/stop_times.csv");
-        Map<String, ArrayList<Station>> routesToStations = mapRouteToStations(routesToTrips, tripsToStations);
-
-        for (String key : routesToStations.keySet()) {
-            ArrayList<Station> stations = routesToStations.get(key);
-            allUBahnStations.addAll(stations);
-        }
-        allUBahnStations = new ArrayList<>(new HashSet<>(allUBahnStations));
-        return allUBahnStations;
     }
 }
