@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 
+/**
+ * Responsible for visualizing States on a GraphStream graph.
+ */
 public class VisualizationEngine extends TimerTask {
 
     private int currentTick = 0;
