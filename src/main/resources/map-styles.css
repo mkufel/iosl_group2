@@ -1,6 +1,7 @@
 node {
     size: 3px;
     fill-color: #000;
+    text-mode: hidden;
 }
 
 node.visited {
