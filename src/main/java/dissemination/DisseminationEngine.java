@@ -15,6 +15,10 @@ public class DisseminationEngine {
         RANDOM = new Random();
     }
 
+    public DisseminationEngine() {
+
+    }
+
     public DisseminationEngine(List<State> states) {
         this.states = states;
     }
