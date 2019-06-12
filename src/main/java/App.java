@@ -2,6 +2,7 @@
 import TraceGenerationEngine.TraceGenerationEngine;
 import common.Map;
 import common.State;
+import dissemination.DisseminationEngine;
 import init.InitEngine;
 import visualization.VisualizationEngine;
 import visualization.VisualizationWindow;
@@ -14,7 +15,7 @@ import java.util.Timer;
 public class App {
 
     public static void main(String[] argv) {
-        System.setProperty("gs.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
+        System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 
         Timer timer = new Timer(true);
 
@@ -22,7 +23,9 @@ public class App {
 
         try {
             TraceGenerationEngine traceEngine = new TraceGenerationEngine();
-            List<State> statesBerlin = traceEngine.getStates();
+            DisseminationEngine disseminationEngine = new DisseminationEngine();
+
+            List<State> statesBerlin = disseminationEngine.getStates(traceEngine.getStates());
 
             VisualizationEngine visualizationEngine = new VisualizationEngine(Map2GraphConverter.convert(berlinMap), statesBerlin);
             VisualizationWindow visualizationWindow = new VisualizationWindow(visualizationEngine, traceEngine);

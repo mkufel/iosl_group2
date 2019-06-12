@@ -9,10 +9,7 @@ import init.InitEngine;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Random;
+import java.util.*;
 
 public class TraceGenerationEngine {
     InitEngine initEngine;
@@ -57,8 +54,8 @@ public class TraceGenerationEngine {
         return result;
     }
 
-    public ArrayList<State> getStates() throws IOException {
-        ArrayList<State> states = new ArrayList<State>();
+    public List<State> getStates() throws IOException {
+        ArrayList<State> states = new ArrayList<>();
         loadInitialPopulationValues();
 
         //initialise empty states
