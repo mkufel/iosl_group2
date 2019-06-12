@@ -79,15 +79,27 @@ public class DisseminationEngine {
     }
 
     /**
-     * TODO
+     * Marks given user as a data carrier in every state where the user appears.
      *
-     * @param receiverState
+     * @param receiverState Data receiver
+     * @param exchangeState State when the data exchange happens
      */
-    private void persistDataTransfer(UserState receiverState) {
+    private void persistDataTransfer(State exchangeState, UserState receiverState) {
         if(!receiverState.isData()) {
             return;
         }
 
-        // TODO Write this.states
+        for(State state : this.states) {
+            if(state.getTick() <= exchangeState.getTick()) {
+                continue;
+            }
+
+            for(UserState user : state.getUserStates()) {
+                if(user.getPersonId() == receiverState.getPersonId()) {
+                    user.setData(true);
+                    break;
+                }
+            }
+        }
     }
 }
