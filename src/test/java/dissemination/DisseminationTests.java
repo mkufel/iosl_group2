@@ -6,11 +6,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class DisseminationTests {
-
     @Test
     public void testEligibleAgents() {
         List<State> states = getStates();

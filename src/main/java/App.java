@@ -25,7 +25,7 @@ public class App {
             TraceGenerationEngine traceEngine = new TraceGenerationEngine();
             DisseminationEngine disseminationEngine = new DisseminationEngine(traceEngine.getStates());
 
-            List<State> states = disseminationEngine.getStates();
+            List<State> states = disseminationEngine.calculateDissemination();
 
             VisualizationEngine visualizationEngine = new VisualizationEngine(Map2GraphConverter.convert(berlinMap), states);
             VisualizationWindow visualizationWindow = new VisualizationWindow(visualizationEngine, traceEngine);

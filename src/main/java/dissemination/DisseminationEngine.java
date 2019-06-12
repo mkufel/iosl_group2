@@ -19,8 +19,16 @@ public class DisseminationEngine {
         this.states = states;
     }
 
-    public List<State> getStates() {
-        // TODO
+    public List<State> calculateDissemination() {
+        for(State state : this.states) {
+            for(TrainState train : findEligibleAgents(state.getUserStates())) {
+                for(UserStatePair pair : pairAgents(train)) {
+                    if(exchange(pair)) {
+                        persistDataTransfer(state, pair.getReceiver());
+                    }
+                }
+            }
+        }
 
         return this.states;
     }
