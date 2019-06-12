@@ -3,12 +3,8 @@ package dissemination;
 import common.State;
 import common.UserState;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Random;
 
 public class DisseminationEngine {
     private static final Random RANDOM;
@@ -51,13 +47,27 @@ public class DisseminationEngine {
         return new ArrayList<>(trains.values());
     }
 
-    private List<UserStatePair> pairAgents(List<UserState> train) {
-        return new ArrayList<>();
+    public List<UserStatePair> pairAgents(TrainState train) {
+        List<UserState> passengersWithData = train.getPassengers().stream()
+                .filter(UserState::isData).collect(Collectors.toList());
+        List<UserState> passengersWithOutData = train.getPassengers().stream()
+                .filter(state -> !state.isData()).collect(Collectors.toList());
+
+        List<UserStatePair> pairs = new ArrayList<>();
+        for (UserState stateWithData : passengersWithData) {
+            if (passengersWithOutData.size() > 0) {
+                UserState stateWithoutData = passengersWithOutData.remove(0);
+                UserStatePair pairedStates = new UserStatePair(stateWithData, stateWithoutData);
+                pairs.add(pairedStates);
+            }
+        }
+
+        return pairs;
     }
 
     /**
      * Performs data exchange between two users.
-     *
+     * <p>
      * Exchange is performed with a given probability and may fail.
      * It will also fail, if the sender has no data to share or the receiver
      * already has this data.
@@ -66,11 +76,11 @@ public class DisseminationEngine {
      * @return True if the data exchange succeeded, false otherwise
      */
     private boolean exchange(UserStatePair pair) {
-        if(!pair.getSender().isData() || pair.getReceiver().isData()) {
+        if (!pair.getSender().isData() || pair.getReceiver().isData()) {
             return false;
         }
 
-        if(!RANDOM.nextBoolean()) {
+        if (!RANDOM.nextBoolean()) {
             return false;
         }
 
