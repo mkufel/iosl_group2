@@ -30,17 +30,15 @@ public class VisualizationWindow extends JFrame {
 
     /**
      * Initializes the Window for the visualization.
-     * @param graphView The graph object to show.
      * @param engine The visualization engine that is runnning the simulation.
      * @param traceGenerationEngine The trace generation engine that loads configurations.
      */
-    public VisualizationWindow(ViewPanel graphView,
-                               VisualizationEngine engine,
+    public VisualizationWindow(VisualizationEngine engine,
                                TraceGenerationEngine traceGenerationEngine) throws HeadlessException {
         super("Dissemination Visualization");
         this.visualizationEngine = engine;
         this.traceGenerationEngine = traceGenerationEngine;
-        this.graphView = graphView;
+        this.graphView = engine.getViewPanel();
         setDefaultWindowConfigurations(graphView);
     }
 
