@@ -7,13 +7,15 @@ public class State {
 
     private List<UserState> userStates;
 
-    private int activeAgents = 0;
+    private int activeAgents;
+
+    private double disseminationFactor;
 
     public State(int tick, List<UserState> users) {
         this.tick = tick;
         this.userStates = users;
         this.activeAgents = this.userStates.stream()
-                .reduce(0, (totalActive, user) -> totalActive + (user.isData() ? 1 : 0), Integer::sum);
+                .reduce(0, (totalActive, user) -> totalActive + (user.hasData() ? 1 : 0), Integer::sum);
     }
 
     public int getTick() {
@@ -42,5 +44,13 @@ public class State {
 
     public void setActiveAgents(int activeAgents) {
         this.activeAgents = activeAgents;
+    }
+
+    public double getDisseminationFactor() {
+        long agentsWithData = this.userStates.stream()
+                .filter(UserState::hasData)
+                .count();
+
+        return agentsWithData / (double) this.userStates.size();
     }
 }

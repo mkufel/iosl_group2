@@ -86,7 +86,7 @@ public class VisualizationEngine extends TimerTask {
         }
 
         if (this.onVisualizationStateChangedListener != null) {
-            this.onVisualizationStateChangedListener.onTick(this.currentTick, currentState.getActiveAgents());
+            this.onVisualizationStateChangedListener.onTick(this.currentTick, currentState.getActiveAgents(), currentState.getDisseminationFactor());
         }
 
     }
@@ -125,7 +125,7 @@ public class VisualizationEngine extends TimerTask {
 
         sprite.setPosition(userState.getProgress());
 
-        if (userState.isData()) {
+        if (userState.hasData()) {
             sprite.addAttribute("ui.class", "active");
         }
     }

@@ -69,8 +69,7 @@ public class UserState {
         this.progress = progress;
     }
 
-    // TODO Rename to hasData()
-    public boolean isData() {
+    public boolean hasData() {
         return data;
     }
 

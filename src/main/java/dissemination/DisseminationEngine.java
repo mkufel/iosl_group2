@@ -20,6 +20,9 @@ public class DisseminationEngine {
     }
 
     public List<State> calculateDissemination() {
+        this.states.get(0).getUserStates().get(0).setData(true);
+        persistDataTransfer(this.states.get(0), this.states.get(0).getUserStates().get(0));
+
         for(State state : this.states) {
             for(TrainState train : findEligibleAgents(state.getUserStates())) {
                 for(UserStatePair pair : pairAgents(train)) {
@@ -56,9 +59,9 @@ public class DisseminationEngine {
 
     public List<UserStatePair> pairAgents(TrainState train) {
         List<UserState> passengersWithData = train.getPassengers().stream()
-                .filter(UserState::isData).collect(Collectors.toList());
+                .filter(UserState::hasData).collect(Collectors.toList());
         List<UserState> passengersWithOutData = train.getPassengers().stream()
-                .filter(state -> !state.isData()).collect(Collectors.toList());
+                .filter(state -> !state.hasData()).collect(Collectors.toList());
 
         List<UserStatePair> pairs = new ArrayList<>();
         for (UserState stateWithData : passengersWithData) {
@@ -83,7 +86,7 @@ public class DisseminationEngine {
      * @return True if the data exchange succeeded, false otherwise
      */
     private boolean exchange(UserStatePair pair) {
-        if (!pair.getSender().isData() || pair.getReceiver().isData()) {
+        if (!pair.getSender().hasData() || pair.getReceiver().hasData()) {
             return false;
         }
 
@@ -103,7 +106,7 @@ public class DisseminationEngine {
      * @param exchangeState State when the data exchange happens
      */
     private void persistDataTransfer(State exchangeState, UserState receiverState) {
-        if(!receiverState.isData()) {
+        if(!receiverState.hasData()) {
             return;
         }
 

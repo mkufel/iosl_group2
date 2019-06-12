@@ -63,7 +63,7 @@ sprite {
 }
 
 sprite.active {
-    size: 5px;
+    size: 15px;
     fill-color: #ff312c;
     text-mode: hidden;
     z-index: 1;

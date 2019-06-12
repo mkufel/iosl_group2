@@ -14,7 +14,7 @@ public class VisualizationWindow extends JFrame {
 
     private static class TextIndicator extends JTextField {
         TextIndicator() {
-            super();
+            super(4);
             this.setEditable(false);
             this.setFocusable(false);
             this.setHorizontalAlignment(SwingConstants.CENTER);
@@ -170,9 +170,14 @@ public class VisualizationWindow extends JFrame {
         TextIndicator fieldTick = new TextIndicator();
         fieldTick.setText("0");
 
-        visualizationEngine.setOnVisualizationStateChangedListener((tick, activeAgents) -> {
+        JLabel labelDissemination = new JLabel("Dissemination");
+        TextIndicator fieldDissemination = new TextIndicator();
+        fieldDissemination.setText("0");
+
+        visualizationEngine.setOnVisualizationStateChangedListener((tick, activeAgents, disseminationFactor) -> {
             fieldTick.setText(Integer.toString(tick));
             fieldActiveAgents.setText(Integer.toString(activeAgents));
+            fieldDissemination.setText(String.format("%.2f%%", disseminationFactor));
         });
 
         Button buttonTickPrev = new Button("-");
@@ -196,6 +201,9 @@ public class VisualizationWindow extends JFrame {
         tools.add(fieldTick);
         tools.add(buttonTickNext);
         tools.add(sliderTick);
+        tools.addSeparator();
+        tools.add(labelDissemination);
+        tools.add(fieldDissemination);
         tools.addSeparator();
 
         return tools;
