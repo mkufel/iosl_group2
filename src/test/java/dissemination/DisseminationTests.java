@@ -13,21 +13,28 @@ public class DisseminationTests {
 
     @Test
     public void testEligibleAgents() {
-        List<UserState> states = getStates().get(5).getUserStates();
-        System.out.println(states);
+        List<State> states = getStates();
+        List<UserState> userStates = states.get(5).getUserStates();
 
-        DisseminationEngine disseminationEngine = new DisseminationEngine();
-        List<TrainState> trainStates = disseminationEngine.findEligibleAgents(states);
+        System.out.println(userStates);
+
+        DisseminationEngine disseminationEngine = new DisseminationEngine(states);
+        List<TrainState> trainStates = disseminationEngine.findEligibleAgents(userStates);
         System.out.println(trainStates);
     }
 
     @Test
     public void testPairing() {
-        List<UserState> states = getStates().get(4).getUserStates();
-        DisseminationEngine disseminationEngine = new DisseminationEngine();
-        List<TrainState> trainStates = disseminationEngine.findEligibleAgents(states);
+        List<State> states = getStates();
+        List<UserState> userStates = states.get(4).getUserStates();
+
+        DisseminationEngine disseminationEngine = new DisseminationEngine(states);
+
+        List<TrainState> trainStates = disseminationEngine.findEligibleAgents(userStates);
         List<UserStatePair> pairs = disseminationEngine.pairAgents(trainStates.get(0));
+
         System.out.println(pairs);
+
         Assert.assertTrue(pairs.size() == 1);
     }
 
