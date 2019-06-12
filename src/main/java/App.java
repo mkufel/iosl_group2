@@ -21,10 +21,10 @@ public class App {
 
         Map berlinMap = new InitEngine().createMapFromBVGFiles();
 
-        try {
-            TraceGenerationEngine traceEngine = new TraceGenerationEngine();
-            DisseminationEngine disseminationEngine = new DisseminationEngine();
+        TraceGenerationEngine traceEngine = new TraceGenerationEngine();
+        DisseminationEngine disseminationEngine = new DisseminationEngine();
 
+        try {
             List<State> statesBerlin = disseminationEngine.getStates(traceEngine.getStates());
 
             VisualizationEngine visualizationEngine = new VisualizationEngine(Map2GraphConverter.convert(berlinMap), statesBerlin);
@@ -33,6 +33,7 @@ public class App {
             visualizationEngine.setRunning(true);
             visualizationWindow.setVisible(true);
 
+            // TODO Encapsulate timer in one of the visualization classes
             timer.scheduleAtFixedRate(visualizationEngine, 0, 1000);
         } catch (IOException e) {
             e.printStackTrace();

@@ -34,7 +34,7 @@ public class VisualizationWindow extends JFrame {
      * @param traceGenerationEngine The trace generation engine that loads configurations.
      */
     public VisualizationWindow(VisualizationEngine engine,
-                               TraceGenerationEngine traceGenerationEngine) throws HeadlessException {
+                               TraceGenerationEngine traceGenerationEngine) {
         super("Dissemination Visualization");
         this.visualizationEngine = engine;
         this.traceGenerationEngine = traceGenerationEngine;
