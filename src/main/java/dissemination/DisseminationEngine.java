@@ -10,18 +10,20 @@ import java.util.Random;
 public class DisseminationEngine {
     private static final Random RANDOM;
 
+    private List<State> states;
+
     static {
         RANDOM = new Random();
     }
 
-    public DisseminationEngine() {
-        // TODO
+    public DisseminationEngine(List<State> states) {
+        this.states = states;
     }
 
-    public List<State> getStates(List<State> states) {
+    public List<State> getStates() {
         // TODO
 
-        return states;
+        return this.states;
     }
 
     private List<List<UserState>> findEligibleAgents(List<UserState> states) {
@@ -56,7 +58,16 @@ public class DisseminationEngine {
         return true;
     }
 
-    private void persistDataTransfer(UserState receivedState) {
+    /**
+     * TODO
+     *
+     * @param receiverState
+     */
+    private void persistDataTransfer(UserState receiverState) {
+        if(!receiverState.isData()) {
+            return;
+        }
 
+        // TODO Write this.states
     }
 }

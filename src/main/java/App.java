@@ -21,13 +21,13 @@ public class App {
 
         Map berlinMap = new InitEngine().createMapFromBVGFiles();
 
-        TraceGenerationEngine traceEngine = new TraceGenerationEngine();
-        DisseminationEngine disseminationEngine = new DisseminationEngine();
-
         try {
-            List<State> statesBerlin = disseminationEngine.getStates(traceEngine.getStates());
+            TraceGenerationEngine traceEngine = new TraceGenerationEngine();
+            DisseminationEngine disseminationEngine = new DisseminationEngine(traceEngine.getStates());
 
-            VisualizationEngine visualizationEngine = new VisualizationEngine(Map2GraphConverter.convert(berlinMap), statesBerlin);
+            List<State> states = disseminationEngine.getStates();
+
+            VisualizationEngine visualizationEngine = new VisualizationEngine(Map2GraphConverter.convert(berlinMap), states);
             VisualizationWindow visualizationWindow = new VisualizationWindow(visualizationEngine, traceEngine);
 
             visualizationEngine.setRunning(true);
