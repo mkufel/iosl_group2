@@ -19,14 +19,19 @@ public class DisseminationEngine {
         this.states = states;
     }
 
+    /***
+     * Attaches dissemination information to the states that have been passed in the contstructor.
+     * For each state, it checks eligible agents, pairs the agents and exchanges information between them.
+     * @return The modified state array.
+     */
     public List<State> calculateDissemination() {
         this.states.get(0).getUserStates().get(0).setData(true);
         persistDataTransfer(this.states.get(0), this.states.get(0).getUserStates().get(0));
 
-        for(State state : this.states) {
-            for(TrainState train : findEligibleAgents(state.getUserStates())) {
-                for(UserStatePair pair : pairAgents(train)) {
-                    if(exchange(pair)) {
+        for (State state : this.states) {
+            for (TrainState train : findEligibleAgents(state.getUserStates())) {
+                for (UserStatePair pair : pairAgents(train)) {
+                    if (exchange(pair)) {
                         persistDataTransfer(state, pair.getReceiver());
                     }
                 }
@@ -36,6 +41,14 @@ public class DisseminationEngine {
         return this.states;
     }
 
+    /***
+     * Given a list of UserStates, the method finds agents that are eligible for data transfer.
+     * <p>
+     *     Eligible means, that they are currently on the very end of their current leg and have not yet exchanged data.
+     * </p>
+     * @param states The list of UserStates to check
+     * @return A list of TrainStates which represent users travelling together in the same train - and eligible for transfer.
+     */
     public List<TrainState> findEligibleAgents(List<UserState> states) {
 
         List<UserState> statesAtEndOfLeg = states.stream()
@@ -57,6 +70,12 @@ public class DisseminationEngine {
         return new ArrayList<>(trains.values());
     }
 
+    /**
+     * Given a train of users, this method finds pairs of users who have and those who do not have the data.
+     *
+     * @param train The TrainState of users.
+     * @return A list of UserStatePairs.
+     */
     public List<UserStatePair> pairAgents(TrainState train) {
         List<UserState> passengersWithData = train.getPassengers().stream()
                 .filter(UserState::hasData).collect(Collectors.toList());
@@ -106,17 +125,17 @@ public class DisseminationEngine {
      * @param exchangeState State when the data exchange happens
      */
     private void persistDataTransfer(State exchangeState, UserState receiverState) {
-        if(!receiverState.hasData()) {
+        if (!receiverState.hasData()) {
             return;
         }
 
-        for(State state : this.states) {
-            if(state.getTick() <= exchangeState.getTick()) {
+        for (State state : this.states) {
+            if (state.getTick() <= exchangeState.getTick()) {
                 continue;
             }
 
-            for(UserState user : state.getUserStates()) {
-                if(user.getPersonId() == receiverState.getPersonId()) {
+            for (UserState user : state.getUserStates()) {
+                if (user.getPersonId() == receiverState.getPersonId()) {
                     user.setData(true);
                     break;
                 }
