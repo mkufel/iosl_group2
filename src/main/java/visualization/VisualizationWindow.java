@@ -147,20 +147,13 @@ public class VisualizationWindow extends JFrame {
 
         JLabel labelSimulatedPopulation = new JLabel("Simulated population");
         TextIndicator fieldSimulatedPopulation = new TextIndicator();
-        fieldSimulatedPopulation.setText("3000");
+        fieldSimulatedPopulation.setText(Integer.toString(traceGenerationEngine.getTotal_users()));
 
         JSlider sliderTick = new JSlider(SwingConstants.HORIZONTAL);
         sliderTick.setValue(0);
-        traceGenerationEngine.setConfigurationChangedListener((totalPopulation, totalTicks) -> {
-            fieldSimulatedPopulation.setText(Integer.toString(totalPopulation));
-            sliderTick.setMaximum(totalTicks);
-            sliderTick.setMinimum(0);
-        });
-
-        sliderTick.addChangeListener(e -> {
-            int tickSelected = sliderTick.getValue();
-            visualizationEngine.setCurrentTick(tickSelected);
-        });
+        sliderTick.setMinimum(0);
+        sliderTick.setMaximum(traceGenerationEngine.getTotal_ticks());
+        sliderTick.addChangeListener(e -> visualizationEngine.setCurrentTick(sliderTick.getValue()));
 
         JLabel labelActiveAgents = new JLabel("Active agents");
         TextIndicator fieldActiveAgents = new TextIndicator();
@@ -174,21 +167,32 @@ public class VisualizationWindow extends JFrame {
         TextIndicator fieldDissemination = new TextIndicator();
         fieldDissemination.setText("0");
 
-        visualizationEngine.setOnVisualizationStateChangedListener((tick, activeAgents, disseminationFactor) -> {
-            fieldTick.setText(Integer.toString(tick));
-            fieldActiveAgents.setText(Integer.toString(activeAgents));
-            fieldDissemination.setText(String.format("%.2f%%", disseminationFactor));
-        });
-
         Button buttonTickPrev = new Button("-");
         buttonTickPrev.setPreferredSize(new Dimension(25, 25));
-        buttonTickPrev.addActionListener(e ->
-                visualizationEngine.setCurrentTick(visualizationEngine.getCurrentTick() - 1));
+        buttonTickPrev.addActionListener(e -> {
+            final int tick = visualizationEngine.getCurrentTick() - 1;
+
+            if(tick >= 0) {
+                visualizationEngine.setCurrentTick(tick);
+            }
+        });
 
         Button buttonTickNext = new Button("+");
         buttonTickNext.setPreferredSize(new Dimension(25, 25));
-        buttonTickNext.addActionListener(e ->
-                visualizationEngine.setCurrentTick(visualizationEngine.getCurrentTick() + 1));
+        buttonTickNext.addActionListener(e -> {
+            final int tick = visualizationEngine.getCurrentTick() + 1;
+
+            if(tick <= traceGenerationEngine.getTotal_ticks() - 1) {
+                visualizationEngine.setCurrentTick(tick);
+            }
+        });
+
+        visualizationEngine.setOnVisualizationStateChangedListener((tick, activeAgents, disseminationFactor) -> {
+            fieldTick.setText(Integer.toString(tick));
+            sliderTick.setValue(tick);
+            fieldActiveAgents.setText(Integer.toString(activeAgents));
+            fieldDissemination.setText(String.format("%.2f%%", disseminationFactor));
+        });
 
         tools.add(labelSimulatedPopulation);
         tools.add(fieldSimulatedPopulation);

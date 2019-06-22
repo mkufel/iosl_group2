@@ -15,6 +15,7 @@ public class TraceGenerationEngine {
     InitEngine initEngine;
     ArrayList<Station> allUBahnStations;
     Map<String, ArrayList<ScheduleItem>> stopsWithSchedule;
+
     int total_users;
     int total_ticks;
 
@@ -29,6 +30,14 @@ public class TraceGenerationEngine {
         initEngine = new InitEngine();
         allUBahnStations = initEngine.getUBahnStations();
         stopsWithSchedule = initEngine.getStopsWithSchedule();
+    }
+
+    public int getTotal_users() {
+        return total_users;
+    }
+
+    public int getTotal_ticks() {
+        return total_ticks;
     }
 
     private String _getConfigValue(String key) throws IOException {
