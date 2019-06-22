@@ -11,10 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class InitEngine {
 
@@ -60,18 +56,8 @@ public class InitEngine {
             ArrayList<Station> stations = routesToStations.get(key);
             allUBahnStations.addAll(stations);
         }
-
-        List<Station> distinctUbahnStations = allUBahnStations
-                .stream()
-                .filter(distinctByKey(Station::getId))
-                .collect(Collectors.toList());
-
-        return new ArrayList<Station>(distinctUbahnStations);
-    }
-
-    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-        Set<Object> seen = ConcurrentHashMap.newKeySet();
-        return t -> seen.add(keyExtractor.apply(t));
+        allUBahnStations = new ArrayList<>(new HashSet<>(allUBahnStations));
+        return allUBahnStations;
     }
 
 
