@@ -25,6 +25,12 @@ public class Station {
 
     public Station() {}
 
+    public Station(Long id, String name, GeoCoords location) {
+        this(id);
+        this.name = name;
+        this.location = location;
+    }
+
     public Long getId() {
         return id;
     }

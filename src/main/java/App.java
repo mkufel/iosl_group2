@@ -19,10 +19,10 @@ public class App {
 
         Timer timer = new Timer(true);
 
-        Map berlinMap = new InitEngine().createMapFromBVGFiles();
-
         try {
-            TraceGenerationEngine traceEngine = new TraceGenerationEngine();
+            InitEngine initEngine = new InitEngine();
+            Map berlinMap = initEngine.createMapFromBVGFiles();
+            TraceGenerationEngine traceEngine = new TraceGenerationEngine(initEngine);
             DisseminationEngine disseminationEngine = new DisseminationEngine(traceEngine.getStates());
 
             List<State> states = disseminationEngine.calculateDissemination();

@@ -11,6 +11,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class InitEngine {
 
@@ -18,6 +22,8 @@ public class InitEngine {
     Map<String, ArrayList<String>> routesToTrips;
     Map<Long, ArrayList<ScheduleItem>> stopsToScheduleItems;
     Map<String, ArrayList<Station>> routesToStations;
+    Map<String, ArrayList<Station>> tripsToStations;
+    Map<Station, ArrayList<Long>> stationsToDuplicateIds;
 
     public InitEngine() {
     }
@@ -47,30 +53,92 @@ public class InitEngine {
     public ArrayList<Station> getUBahnStations() {
         System.out.println("Parsing U-Bahn stations...");
         ArrayList<Station> allUBahnStations = new ArrayList();
+
         if (routeIdsToLineNames == null) routeIdsToLineNames = readRoutesFromCSV("resources/routes.csv");
         if (routesToTrips == null) routesToTrips = mapRoutesToTripsFromCSV(routeIdsToLineNames, "resources/trips.csv");
-        Map<String, ArrayList<Station>> tripsToStations = parseStationTimesFromCSV("resources/stop_times.csv");
+        if (tripsToStations == null) tripsToStations = parseStationTimesFromCSV("resources/stop_times.csv");
         if (routesToStations == null) routesToStations = mapRouteToStations(routesToTrips, tripsToStations);
 
         for (String key : routesToStations.keySet()) {
             ArrayList<Station> stations = routesToStations.get(key);
             allUBahnStations.addAll(stations);
         }
-        allUBahnStations = new ArrayList<>(new HashSet<>(allUBahnStations));
-        return allUBahnStations;
+
+        List<Station> distinctUbahnStations = allUBahnStations
+                .stream()
+                .filter(distinctByKey(Station::getId))
+                .collect(Collectors.toList());
+
+        for (Station st : distinctUbahnStations) {
+            System.out.println(st.getId());
+        }
+        return new ArrayList<Station>(distinctUbahnStations);
     }
 
 
     public common.Map createMapFromBVGFiles() {
-        Map<String, String> routes_dict = this.readRoutesFromCSV("resources/routes.csv");
-        Map<String, ArrayList<String>> routesToTrips = this.mapRoutesToTripsFromCSV(routes_dict, "resources/trips.csv");
-        Map<String, ArrayList<Station>> tripsToStations = this.parseStationTimesFromCSV("resources/stop_times.csv");
+        if (routeIdsToLineNames == null) routeIdsToLineNames = this.readRoutesFromCSV("resources/routes.csv");
+        if (routesToTrips == null) routesToTrips = this.mapRoutesToTripsFromCSV(routeIdsToLineNames, "resources/trips.csv");
+        if (tripsToStations == null) tripsToStations = this.parseStationTimesFromCSV("resources/stop_times.csv");
         if (routesToStations == null) routesToStations = this.mapRouteToStations(routesToTrips, tripsToStations);
-        Map<String, ArrayList<Station>> routeIdsToStations = this.addStationCoordsToRouteStationsMapping(routesToStations, "resources/stops.csv");
+        routesToStations = this.addStationCoordsToRouteStationsMapping(routesToStations, "resources/stops.csv");
 
-        return this.createMap(routeIdsToStations, routes_dict);
+//        System.out.println("Before");
+//        for (String route : routesToStations.keySet()) {
+//            for (Station station : routesToStations.get(route)) {
+//                System.out.println(station.getName() + ", " + station.getId());
+//            }
+//        }
+        //remove dup station ids
+        if (stationsToDuplicateIds == null) stationsToDuplicateIds = this.getDuplicatesStopsFromCSV();
+        Map<String, ArrayList<Station>> routesToStationsWithoutDuplicates = new HashMap<>();
+
+        for (String route : routesToStations.keySet()) {
+            ArrayList<Station> correctedStations = new ArrayList<>();
+
+            for (Station checkedStation : routesToStations.get(route)) {
+                // if the station id doesn't match any of the keys in the mapping stationsToDuplicateIds, then it's a duplicate
+                if (stationsToDuplicateIds.keySet().stream().noneMatch(x -> x.getId().equals(checkedStation.getId()))) {
+                    for (Station correctStation : stationsToDuplicateIds.keySet()) {
+
+                        if (stationsToDuplicateIds.get(correctStation).contains(checkedStation.getId())) {
+                            correctedStations.add(new Station(
+                                    correctStation.getId(),
+                                    checkedStation.getName(),
+                                    checkedStation.getLocation(),
+                                    checkedStation.getPopulation())
+                            );
+                        }
+                    }
+                } else {
+                    correctedStations.add(checkedStation);
+                }
+            }
+
+            correctedStations = (ArrayList<Station>) correctedStations
+                    .stream()
+                    .filter(distinctByKey(Station::getId))
+                    .collect(Collectors.toList());
+
+            routesToStationsWithoutDuplicates.put(route, correctedStations);
+        }
+
+        routesToStations = routesToStationsWithoutDuplicates;
+
+        System.out.println("After");
+        for (String route : routesToStations.keySet()) {
+            for (Station station : routesToStations.get(route)) {
+                System.out.println(station.getId());
+            }
+        }
+
+        return this.createMap(routesToStations, routeIdsToLineNames);
     }
 
+    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
+    }
 
     /**
      * Parse the CSV file mapping ubahn lines to route identifiers
@@ -344,9 +412,17 @@ public class InitEngine {
             Long stop_id = Long.parseLong(nextRecord[3]);
             Long nextStop_id = Long.parseLong(nextNextRecord[3]);
 
-//            // Remove preceeding 0's from stop ids
-//            if (stop_id.startsWith("0")) stop_id = stop_id.substring(1, stop_id.length());
-//            if (nextStop_id.startsWith("0")) nextStop_id = nextStop_id.substring(1, nextStop_id.length());
+            for (Station station : stationsToDuplicateIds.keySet()) {
+                if (stationsToDuplicateIds.get(station).contains(stop_id)) {
+                    stop_id = station.getId();
+                }
+            }
+
+            for (Station station : stationsToDuplicateIds.keySet()) {
+                if (stationsToDuplicateIds.get(station).contains(nextStop_id)) {
+                    nextStop_id = station.getId();
+                }
+            }
 
             // If a stop is already in the mapping, extract the ScheduleItems and append a new one
             if ((tempScheduleItems = stopsToScheduleItems.get(stop_id)) != null) {
@@ -386,4 +462,48 @@ public class InitEngine {
 
         return line_name;
     }
+
+
+    /**
+     *
+     * @return
+     */
+    private Map<Station, ArrayList<Long>> getDuplicatesStopsFromCSV() {
+        Map<Station, ArrayList<Long>> mapStationsToDuplicateIds = new HashMap<>();
+        Path pathtoStops = Paths.get("resources/stops.csv");
+
+        try (
+                Reader reader = Files.newBufferedReader(pathtoStops);
+                CSVReader csvReader = new CSVReader(reader, ',', '"', 1);
+        ) {
+            String[] nextRecord;
+
+            while ((nextRecord = csvReader.readNext()) != null) {
+                Double lat = Double.parseDouble(nextRecord[4]);
+                Double lon = Double.parseDouble(nextRecord[5]);
+                Long id = Long.parseLong(nextRecord[0]);
+                String name = nextRecord[2];
+
+                Optional<Station> optStation = mapStationsToDuplicateIds.keySet()
+                        .stream()
+                        .filter(x -> lat.equals(x.getLocation().getLat()) && lon.equals(x.getLocation().getLon()))
+                        .findFirst();
+
+                if (optStation.isPresent()) {
+                    ArrayList<Long> stationAliases = mapStationsToDuplicateIds.get(optStation.get());
+                    stationAliases.add(id);
+                    mapStationsToDuplicateIds.put(optStation.get(), stationAliases);
+                } else {
+                    Station station = new Station(id, name, new GeoCoords(lat, lon));
+                    ArrayList<Long> stationAliases = new ArrayList<>(Arrays.asList(id));
+                    mapStationsToDuplicateIds.put(station, stationAliases);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return mapStationsToDuplicateIds;
+    }
+
 }

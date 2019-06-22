@@ -26,6 +26,11 @@ public class TraceGenerationEngine {
         System.out.println(tce.getStates());
     }
 
+    public TraceGenerationEngine(InitEngine initEngine) {
+        allUBahnStations = initEngine.getUBahnStations();
+        stopsWithSchedule = initEngine.getStopsWithSchedule();
+    }
+
     public TraceGenerationEngine() {
         initEngine = new InitEngine();
         allUBahnStations = initEngine.getUBahnStations();
@@ -77,8 +82,9 @@ public class TraceGenerationEngine {
             System.out.println("Generating state for user id: " + i);
             int startTick = rand.nextInt(total_ticks);
 
-            Long startStation = getStartStation().getId();
-            Long endStation = startStation;
+            Long currentStation = getStartStation().getId();
+            Long previousStation = currentStation;
+            Long endStation = currentStation;
 
             int TOTAL_STOPS = 5 * (5 + rand.nextInt(11));
             State state;
@@ -89,19 +95,21 @@ public class TraceGenerationEngine {
 
                 //User is inside a train
                 if (progress > 0.0) {
-                    UserState userState = new UserState(i, startStation, endStation, lineName, progress, false);
+                    UserState userState = new UserState(i, currentStation, endStation, lineName, progress, false);
                     state.addUserState(userState);
                     progress += 0.2; //TODO: calculate progress based on length of leg
-                } else { //User is at a station
-                    ArrayList<ScheduleItem> scheduleFromStartStation = this.stopsWithSchedule.get(startStation);
+                }
+                else { //User is at a station
+                    ArrayList<ScheduleItem> scheduleFromStartStation = this.stopsWithSchedule.get(currentStation);
                     if(scheduleFromStartStation != null) {
-                        ScheduleItem nextScheduleItem = getNextScheduleItem(scheduleFromStartStation, tick, startStation);
+                        ScheduleItem nextScheduleItem = getNextScheduleItem(scheduleFromStartStation, tick, previousStation);
+
                         //Found a train in the next 5 minutes
                         if (nextScheduleItem != null && nextScheduleItem.getNextStop_id() != null) {
                             endStation = nextScheduleItem.getNextStop_id();
                             lineName = nextScheduleItem.getLine_name();
                         }
-                        UserState userState = new UserState(i, startStation, endStation, lineName, progress, false);
+                        UserState userState = new UserState(i, currentStation, endStation, lineName, progress, false);
                         state.addUserState(userState);
                         progress += 0.2; //TODO: calculate progress based on length of leg
                     }
@@ -110,24 +118,26 @@ public class TraceGenerationEngine {
                 // User has reached a station
                 if (progress >= 1.0) {
                     progress = 0.0;
-                    startStation = endStation;
+                    previousStation = currentStation;
+                    currentStation = endStation;
                 }
             }
         }
         return states;
     }
 
-    private ScheduleItem getNextScheduleItem(ArrayList<ScheduleItem> scheduleItems, int tick, Long currentStation) throws IOException {
+    private ScheduleItem getNextScheduleItem(ArrayList<ScheduleItem> scheduleItems, int tick, Long previousStation) throws IOException {
         String startTime = this._getConfigValue("start_time");
         int currentTime = getAbsoluteTimeFromTick(startTime, tick);
         ArrayList<ScheduleItem> scheduleItemsToBeConsidered= new ArrayList<>();
+
         for (ScheduleItem scheduleItem: scheduleItems) {
             String dt = scheduleItem.getDeparture_time();
             String[] components = dt.split(":");
             int departureTimeInSeconds = Integer.parseInt(components[0])*60*60
                                             + Integer.parseInt(components[1])*60
                                             + Integer.parseInt(components[2]);
-            if (departureTimeInSeconds > currentTime && departureTimeInSeconds - currentTime < 10*60) {
+            if (departureTimeInSeconds > currentTime && departureTimeInSeconds - currentTime < 10*60 && !scheduleItem.getNextStop_id().equals(previousStation)) {
                 scheduleItemsToBeConsidered.add(scheduleItem);
             }
         }
@@ -165,6 +175,7 @@ public class TraceGenerationEngine {
         ArrayList<Long> station_ids = new ArrayList<>();
         ArrayList<Double> popularities = new ArrayList<>();
         Double totalProbabilityCovered = 0.0;
+
         for (Station s : this.allUBahnStations) {
             Double station_popularity = Double.parseDouble(_getConfigValue("station." + s.getId()));
             if (station_popularity != null) {
