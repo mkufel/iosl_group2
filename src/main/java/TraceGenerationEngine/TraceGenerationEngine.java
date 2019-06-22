@@ -72,62 +72,70 @@ public class TraceGenerationEngine {
             states.add(new State(i, new ArrayList<>()));
         }
         Random rand = new Random();
-
         for (int i = 0; i < total_users; i++) {
-            System.out.println("Generating state for user id: " + i);
+          System.out.println("Generating state for user id: " + i);
             int startTick = rand.nextInt(total_ticks);
 
             Long startStation = getStartStation().getId();
             Long endStation = startStation;
-
+            Long previousStation = null;
             int TOTAL_STOPS = 5 * (5 + rand.nextInt(11));
             State state;
             Double progress = 0.0;
             String lineName = "";
-            for (int tick = startTick; (tick < startTick + TOTAL_STOPS) && (tick < total_ticks); tick++) {
+            int tick = startTick;
+            while ((tick < startTick + TOTAL_STOPS*5) && (tick < total_ticks)) {
                 state = states.get(tick);
 
                 //User is inside a train
                 if (progress > 0.0) {
+                    progress += 0.2; //TODO: calculate progress based on length of leg
                     UserState userState = new UserState(i, startStation, endStation, lineName, progress, false);
                     state.addUserState(userState);
-                    progress += 0.2; //TODO: calculate progress based on length of leg
                 } else { //User is at a station
                     ArrayList<ScheduleItem> scheduleFromStartStation = this.stopsWithSchedule.get(startStation);
                     if(scheduleFromStartStation != null) {
-                        ScheduleItem nextScheduleItem = getNextScheduleItem(scheduleFromStartStation, tick, startStation);
-                        //Found a train in the next 5 minutes
+                        //Simulate a wait time (MAX: 20 ticks - 10 minutes) at the station
+                        int randomWaitTime = rand.nextInt(10);
+                        for(int j = 0; j < randomWaitTime; j++) {
+                            state.addUserState(new UserState(i, startStation, endStation, lineName, 0.0, false));
+                        }
+                        tick += randomWaitTime;
+                        ScheduleItem nextScheduleItem = getNextScheduleItem(scheduleFromStartStation, tick, previousStation);
                         if (nextScheduleItem != null && nextScheduleItem.getNextStop_id() != null) {
                             endStation = nextScheduleItem.getNextStop_id();
                             lineName = nextScheduleItem.getLine_name();
+                            progress += 0.2; //TODO: calculate progress based on length of leg
                         }
                         UserState userState = new UserState(i, startStation, endStation, lineName, progress, false);
                         state.addUserState(userState);
-                        progress += 0.2; //TODO: calculate progress based on length of leg
                     }
                 }
 
                 // User has reached a station
                 if (progress >= 1.0) {
                     progress = 0.0;
+                    previousStation = startStation;
                     startStation = endStation;
                 }
+                tick++;
             }
         }
         return states;
     }
 
-    private ScheduleItem getNextScheduleItem(ArrayList<ScheduleItem> scheduleItems, int tick, Long currentStation) throws IOException {
+    private ScheduleItem getNextScheduleItem(ArrayList<ScheduleItem> scheduleItems, int tick, Long previousStation) throws IOException {
         String startTime = this._getConfigValue("start_time");
         int currentTime = getAbsoluteTimeFromTick(startTime, tick);
         ArrayList<ScheduleItem> scheduleItemsToBeConsidered= new ArrayList<>();
         for (ScheduleItem scheduleItem: scheduleItems) {
             String dt = scheduleItem.getDeparture_time();
+            Long stopId = scheduleItem.getNextStop_id();
             String[] components = dt.split(":");
             int departureTimeInSeconds = Integer.parseInt(components[0])*60*60
                                             + Integer.parseInt(components[1])*60
                                             + Integer.parseInt(components[2]);
-            if (departureTimeInSeconds > currentTime && departureTimeInSeconds - currentTime < 10*60) {
+            if (departureTimeInSeconds == currentTime) {
                 scheduleItemsToBeConsidered.add(scheduleItem);
             }
         }
@@ -165,29 +173,29 @@ public class TraceGenerationEngine {
         ArrayList<Long> station_ids = new ArrayList<>();
         ArrayList<Double> popularities = new ArrayList<>();
         Double totalProbabilityCovered = 0.0;
-        for (Station s : this.allUBahnStations) {
-            Double station_popularity = Double.parseDouble(_getConfigValue("station." + s.getId()));
-            if (station_popularity != null) {
-                station_ids.add(s.getId());
-                popularities.add(totalProbabilityCovered);
-                totalProbabilityCovered += station_popularity;
-            }
-        }
+       for (Station s : this.allUBahnStations) {
+           Double station_popularity = Double.parseDouble(_getConfigValue("station." + s.getId()));
+           if (station_popularity != null) {
+               station_ids.add(s.getId());
+               popularities.add(totalProbabilityCovered);
+               totalProbabilityCovered += station_popularity;
+           }
+       }
 
-        Random rand = new Random();
+       Random rand = new Random();
 
-        Double randNum = rand.nextDouble() * totalProbabilityCovered;
-        for (int i = 0; i < popularities.size() - 1; i++) {
-            if (popularities.get(i) <= randNum && popularities.get(i + 1) > randNum) {
-                int index = this.allUBahnStations.indexOf(new Station(station_ids.get(i)));
-                if (index > -1) {
-                    return this.allUBahnStations.get(index);
-                } else {
-                    return this.allUBahnStations.get(0);
-                }
-            }
-        }
-        return this.allUBahnStations.get(0);
+       Double randNum = rand.nextDouble() * totalProbabilityCovered;
+       for (int i = 0; i < popularities.size() - 1; i++) {
+           if (popularities.get(i) <= randNum && popularities.get(i + 1) > randNum) {
+               int index = this.allUBahnStations.indexOf(new Station(station_ids.get(i)));
+               if (index > -1) {
+                   return this.allUBahnStations.get(index);
+               } else {
+                   return this.allUBahnStations.get(0);
+               }
+           }
+       }
+       return this.allUBahnStations.get(0);
     }
 
 

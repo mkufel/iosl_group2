@@ -25,8 +25,16 @@ public class DisseminationEngine {
      * @return The modified state array.
      */
     public List<State> calculateDissemination() {
-        this.states.get(0).getUserStates().get(0).setData(true);
-        persistDataTransfer(this.states.get(0), this.states.get(0).getUserStates().get(0));
+
+        for(int i = 0; i < states.size(); i++)
+        {
+            State state = states.get(i);
+            if(state.getUserStates() != null && state.getUserStates().size() > 0) {
+                state.getUserStates().get(0).setData(true);
+                persistDataTransfer(state, state.getUserStates().get(0));
+                break;
+            }
+        }
 
         for (State state : this.states) {
             for (TrainState train : findEligibleAgents(state.getUserStates())) {
@@ -37,7 +45,7 @@ public class DisseminationEngine {
                 }
             }
         }
-
+        
         return this.states;
     }
 
@@ -53,6 +61,7 @@ public class DisseminationEngine {
 
         List<UserState> statesAtEndOfLeg = states.stream()
                 .filter(state -> state.getProgress() >= 1).collect(Collectors.toList());
+        // statesAtEndOfLeg = states;
         // Map of startStationId + endStationId as key
         Map<String, TrainState> trains = new HashMap<>();
         for (UserState state : statesAtEndOfLeg) {
@@ -109,9 +118,9 @@ public class DisseminationEngine {
             return false;
         }
 
-        if (!RANDOM.nextBoolean()) {
-            return false;
-        }
+       if (!RANDOM.nextBoolean()) {
+           return false;
+       }
 
         pair.getReceiver().setData(true);
 

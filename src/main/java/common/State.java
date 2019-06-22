@@ -53,4 +53,9 @@ public class State {
 
         return agentsWithData / (double) this.userStates.size();
     }
+
+    @Override
+    public String toString() {
+        return this.userStates.toString();
+    }
 }
