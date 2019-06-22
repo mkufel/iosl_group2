@@ -16,7 +16,7 @@ public class InitEngine {
 
     Map<String, String> routeIdsToLineNames;
     Map<String, ArrayList<String>> routesToTrips;
-    Map<String, ArrayList<ScheduleItem>> stopsToScheduleItems;
+    Map<Long, ArrayList<ScheduleItem>> stopsToScheduleItems;
     Map<String, ArrayList<Station>> routesToStations;
 
     public InitEngine() {
@@ -28,7 +28,7 @@ public class InitEngine {
      * Creates a mapping of stopIds to a list of their ScheduleItems (all trains leaving from the station)
      * @return Mapping stopId - ScheduleItem[]
      */
-    public Map<String, ArrayList<ScheduleItem>> getStopsWithSchedule() {
+    public Map<Long, ArrayList<ScheduleItem>> getStopsWithSchedule() {
         System.out.println("Parsing stops with their schedules...");
 
         if (routeIdsToLineNames == null) routeIdsToLineNames = this.readRoutesFromCSV("resources/routes.csv");
@@ -288,8 +288,8 @@ public class InitEngine {
     }
 
 
-    private Map<String, ArrayList<ScheduleItem>> mapStopsToScheduleItems(String fileName, Map<String, ArrayList<String>> routeIdsToTrips, Map<String, String> routesIdsToLineNames) {
-        Map<String, ArrayList<ScheduleItem>> stopsToScheduleItems = new HashMap<>();
+    private Map<Long, ArrayList<ScheduleItem>> mapStopsToScheduleItems(String fileName, Map<String, ArrayList<String>> routeIdsToTrips, Map<String, String> routesIdsToLineNames) {
+        Map<Long, ArrayList<ScheduleItem>> stopsToScheduleItems = new HashMap<>();
         Path pathToFile = Paths.get(fileName);
 
         try (
@@ -333,7 +333,7 @@ public class InitEngine {
     }
 
 
-    private Map<String, ArrayList<ScheduleItem>> updateStopsToScheduleItemsMap(Map<String, ArrayList<ScheduleItem>> stopsToScheduleItems, String[] nextRecord, String[] nextNextRecord, String line_name) {
+    private Map<Long, ArrayList<ScheduleItem>> updateStopsToScheduleItemsMap(Map<Long, ArrayList<ScheduleItem>> stopsToScheduleItems, String[] nextRecord, String[] nextNextRecord, String line_name) {
 
         // If both entries belong to the same trip [0] and are consecutive in the stop sequence [4],
         // extract the line name and if U-bahn create an entry in stopsToScheduleItem
@@ -341,12 +341,12 @@ public class InitEngine {
 
             ArrayList<ScheduleItem> tempScheduleItems;
             String departure_time = nextRecord[2];
-            String stop_id = nextRecord[3];
-            String nextStop_id = nextNextRecord[3];
+            Long stop_id = Long.parseLong(nextRecord[3]);
+            Long nextStop_id = Long.parseLong(nextNextRecord[3]);
 
-            // Remove preceeding 0's from stop ids
-            if (stop_id.startsWith("0")) stop_id = stop_id.substring(1, stop_id.length());
-            if (nextStop_id.startsWith("0")) nextStop_id = nextStop_id.substring(1, nextStop_id.length());
+//            // Remove preceeding 0's from stop ids
+//            if (stop_id.startsWith("0")) stop_id = stop_id.substring(1, stop_id.length());
+//            if (nextStop_id.startsWith("0")) nextStop_id = nextStop_id.substring(1, nextStop_id.length());
 
             // If a stop is already in the mapping, extract the ScheduleItems and append a new one
             if ((tempScheduleItems = stopsToScheduleItems.get(stop_id)) != null) {

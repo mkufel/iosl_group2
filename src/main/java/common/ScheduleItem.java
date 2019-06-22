@@ -4,9 +4,9 @@ public class ScheduleItem {
 
     String line_name;
     String departure_time;
-    String nextStop_id;
+    Long nextStop_id;
 
-    public ScheduleItem(String line_name, String departure_time, String nextStop_id) {
+    public ScheduleItem(String line_name, String departure_time, Long nextStop_id) {
         this.line_name = line_name;
         this.departure_time = departure_time;
         this.nextStop_id = nextStop_id;
@@ -20,7 +20,7 @@ public class ScheduleItem {
         return departure_time;
     }
 
-    public String getNextStop_id() {
+    public Long getNextStop_id() {
         return nextStop_id;
     }
 }

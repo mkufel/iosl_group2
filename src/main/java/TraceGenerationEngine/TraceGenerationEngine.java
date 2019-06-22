@@ -14,7 +14,7 @@ import java.util.*;
 public class TraceGenerationEngine {
     InitEngine initEngine;
     ArrayList<Station> allUBahnStations;
-    Map<String, ArrayList<ScheduleItem>> stopsWithSchedule;
+    Map<Long, ArrayList<ScheduleItem>> stopsWithSchedule;
 
     int total_users;
     int total_ticks;
@@ -80,7 +80,7 @@ public class TraceGenerationEngine {
             Long startStation = getStartStation().getId();
             Long endStation = startStation;
 
-            int TOTAL_STOPS = 5 + rand.nextInt(11);
+            int TOTAL_STOPS = 5 * (5 + rand.nextInt(11));
             State state;
             Double progress = 0.0;
             String lineName = "";
@@ -93,12 +93,12 @@ public class TraceGenerationEngine {
                     state.addUserState(userState);
                     progress += 0.2; //TODO: calculate progress based on length of leg
                 } else { //User is at a station
-                    ArrayList<ScheduleItem> scheduleFromStartStation = this.stopsWithSchedule.get(Long.toString(startStation));
+                    ArrayList<ScheduleItem> scheduleFromStartStation = this.stopsWithSchedule.get(startStation);
                     if(scheduleFromStartStation != null) {
                         ScheduleItem nextScheduleItem = getNextScheduleItem(scheduleFromStartStation, tick, startStation);
                         //Found a train in the next 5 minutes
                         if (nextScheduleItem != null && nextScheduleItem.getNextStop_id() != null) {
-                            endStation = Long.parseLong(nextScheduleItem.getNextStop_id());
+                            endStation = nextScheduleItem.getNextStop_id();
                             lineName = nextScheduleItem.getLine_name();
                         }
                         UserState userState = new UserState(i, startStation, endStation, lineName, progress, false);
@@ -142,15 +142,14 @@ public class TraceGenerationEngine {
         return scheduleItemsToBeConsidered.get(randNum);
     }
 
+
     private int getAbsoluteTimeFromTick(String startTime, int tick) throws IOException {
         //Each tick is 30 seconds
         int timeElapsedSinceStart = tick * 30;
         return Integer.parseInt(startTime) * 60 * 60 + timeElapsedSinceStart;
     }
-//        int hours = currentTime/(60*60);
-//        int minutes = (currentTime - (hours * 60 * 60))/60;
-//        int seconds = (currentTime - (minutes * 60));
-//        return String.format("%d:%d:%d", hours, minutes, seconds);
+
+
     private void loadInitialPopulationValues() throws IOException {
         total_users = Integer.parseInt(_getConfigValue("total_users"));
         total_ticks = Integer.parseInt(_getConfigValue("total_ticks"));
@@ -160,6 +159,7 @@ public class TraceGenerationEngine {
         }
 
     }
+
 
     private Station getStartStation() throws IOException {
         ArrayList<Long> station_ids = new ArrayList<>();
@@ -190,9 +190,11 @@ public class TraceGenerationEngine {
         return this.allUBahnStations.get(0);
     }
 
+
     public ConfigurationChangedListener getConfigurationChangedListener() {
         return configurationChangedListener;
     }
+
 
     public void setConfigurationChangedListener(ConfigurationChangedListener configurationChangedListener) {
         this.configurationChangedListener = configurationChangedListener;
