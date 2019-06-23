@@ -36,7 +36,7 @@ public class Map2GraphConverter {
         Graph graph = new MultiGraph("Berlin");
 
         for (Line line : map.getLines()) {
-            System.out.println("Displaying line: " + line.getName());
+//            System.out.println("Displaying line: " + line.getName());
 
             for (int i = 0; i < line.getStations().size(); i++) {
                 Station currentStation = line.getStations().get(i);
@@ -60,13 +60,12 @@ public class Map2GraphConverter {
 
     private static void addEdgeToGraphIfDoesNotExist(Graph graph, Station startStation, Station endStation, Node startNode, Node nextStationNode, String lineName) {
         // Connect stations with an edge
-        String edgeId = startStation.getId() < endStation.getId() ? startStation.getId() + "_" + endStation.getId()
-                : endStation.getId() + "_" + startStation.getId();
+        String edgeId = startStation.getId() + "_" + endStation.getId();
         Edge connectingEdge = graph.getEdge(edgeId);
         if (connectingEdge == null) {
             connectingEdge = graph.addEdge(edgeId, startNode, nextStationNode);
             connectingEdge.addAttribute("ui.class", lineName);
-            System.out.println("Edge created between: " + startStation.getId() + " - " + endStation.getId());
+//            System.out.println("Edge created between: " + startStation.getId() + " - " + endStation.getId());
         }
     }
 
@@ -77,8 +76,8 @@ public class Map2GraphConverter {
             stationNode = graph.addNode("" + station.getId());
             stationNode.addAttribute("ui.label", station.getName());
             int[] coords = GeoCoordsUtils.convertToCartesian(station.getLocation());
-            System.out.println("Coordinates Lat/Lon: " + station.getLocation().getLat() + ", " + station.getLocation().getLon());
-            System.out.println("Coordinates X/Y: " + coords[0] + ", " + coords[1]);
+//            System.out.println("Coordinates Lat/Lon: " + station.getLocation().getLat() + ", " + station.getLocation().getLon());
+//            System.out.println("Coordinates X/Y: " + coords[0] + ", " + coords[1]);
             stationNode.setAttribute("xyz", coords[0], coords[1], 0);
         }
         return stationNode;
@@ -86,8 +85,8 @@ public class Map2GraphConverter {
 
 
     public static String readFile() throws IOException {
-        System.out.println("Working Directory = " +
-                System.getProperty("user.dir"));
+//        System.out.println("Working Directory = " +
+//                System.getProperty("user.dir"));
         File file = new File("src/main/resources/map-styles.css");
 
         return FileUtils.readFileToString(file, "utf-8");

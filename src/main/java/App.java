@@ -1,7 +1,6 @@
 
 import TraceGenerationEngine.TraceGenerationEngine;
-import common.Map;
-import common.State;
+import common.*;
 import dissemination.DisseminationEngine;
 import init.InitEngine;
 import visualization.VisualizationEngine;
@@ -9,6 +8,8 @@ import visualization.VisualizationWindow;
 import visualization.services.Map2GraphConverter;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 
@@ -23,13 +24,14 @@ public class App {
             InitEngine initEngine = new InitEngine();
             Map berlinMap = initEngine.createMapFromBVGFiles();
             TraceGenerationEngine traceEngine = new TraceGenerationEngine(initEngine);
-            DisseminationEngine disseminationEngine = new DisseminationEngine(traceEngine.getStates());
 
+            DisseminationEngine disseminationEngine = new DisseminationEngine(traceEngine.getStates());
             List<State> states = disseminationEngine.calculateDissemination();
 
             VisualizationEngine visualizationEngine = new VisualizationEngine(Map2GraphConverter.convert(berlinMap), states);
             VisualizationWindow visualizationWindow = new VisualizationWindow(visualizationEngine, traceEngine);
 
+            System.out.println("Drawing user states on the map...");
             visualizationEngine.setRunning(true);
             visualizationWindow.setVisible(true);
 

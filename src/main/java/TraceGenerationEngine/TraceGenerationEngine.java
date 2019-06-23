@@ -77,16 +77,17 @@ public class TraceGenerationEngine {
             states.add(new State(i, new ArrayList<>()));
         }
         Random rand = new Random();
+        System.out.println("Generating user states...");
 
         for (int i = 0; i < total_users; i++) {
-            System.out.println("Generating state for user id: " + i);
+//            System.out.println("Generating state for user id: " + i);
             int startTick = rand.nextInt(total_ticks);
 
             Long currentStation = getStartStation().getId();
             Long previousStation = currentStation;
             Long endStation = currentStation;
 
-            int TOTAL_STOPS = 5 * (5 + rand.nextInt(11));
+            int TOTAL_STOPS = 5 * (8 + rand.nextInt(11));
             State state;
             Double progress = 0.0;
             String lineName = "";

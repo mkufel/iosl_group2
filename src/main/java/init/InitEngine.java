@@ -69,9 +69,6 @@ public class InitEngine {
                 .filter(distinctByKey(Station::getId))
                 .collect(Collectors.toList());
 
-        for (Station st : distinctUbahnStations) {
-            System.out.println(st.getId());
-        }
         return new ArrayList<Station>(distinctUbahnStations);
     }
 
@@ -83,13 +80,7 @@ public class InitEngine {
         if (routesToStations == null) routesToStations = this.mapRouteToStations(routesToTrips, tripsToStations);
         routesToStations = this.addStationCoordsToRouteStationsMapping(routesToStations, "resources/stops.csv");
 
-//        System.out.println("Before");
-//        for (String route : routesToStations.keySet()) {
-//            for (Station station : routesToStations.get(route)) {
-//                System.out.println(station.getName() + ", " + station.getId());
-//            }
-//        }
-        //remove dup station ids
+        //remove duplicate station ids
         if (stationsToDuplicateIds == null) stationsToDuplicateIds = this.getDuplicatesStopsFromCSV();
         Map<String, ArrayList<Station>> routesToStationsWithoutDuplicates = new HashMap<>();
 
@@ -124,13 +115,6 @@ public class InitEngine {
         }
 
         routesToStations = routesToStationsWithoutDuplicates;
-
-        System.out.println("After");
-        for (String route : routesToStations.keySet()) {
-            for (Station station : routesToStations.get(route)) {
-                System.out.println(station.getId());
-            }
-        }
 
         return this.createMap(routesToStations, routeIdsToLineNames);
     }
@@ -347,8 +331,21 @@ public class InitEngine {
             String lineName = routes_dict.get(key);
             Line line = new Line();
             line.setName(lineName);
-            line.setStations(routeIdsToStations.get(key));
+
+            ArrayList<Station> stations = routeIdsToStations.get(key);
+            line.setStations(stations);
             lines.add(line);
+
+            Line lineReversed = new Line();
+            lineReversed.setName(lineName);
+            ArrayList<Station> reversedStations = new ArrayList<>();
+            for (Station station : stations) {
+                reversedStations.add(0, new Station(station.getId(), station.getName(), station.getLocation(), station.getPopulation()));
+            }
+
+            lineReversed.setStations(reversedStations);
+            lines.add(lineReversed);
+
         }
 
         map.setLines(lines);

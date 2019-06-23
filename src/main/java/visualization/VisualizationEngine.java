@@ -79,7 +79,7 @@ public class VisualizationEngine extends TimerTask {
 
         removeOldSpritesFromGraph();
 
-        System.out.println("Drawing state at tick: " + currentTick);
+//        System.out.println("Drawing state at tick: " + currentTick);
         State currentState = this.states.get(currentTick);
         for (UserState userState : currentState.getUserStates()) {
             this.drawUserState(userState);
@@ -116,7 +116,7 @@ public class VisualizationEngine extends TimerTask {
         String spriteCurrentEdge = sprite.getAttribute("currentEdge");
         String stateCurrentEdge = userState.getEdgeId();
 
-        System.out.println("State edge:" + stateCurrentEdge);
+//        System.out.println("State edge:" + stateCurrentEdge);
         if (!spriteCurrentEdge.equals(stateCurrentEdge)) {
             System.out.println("Edges do not match");
             sprite.detach();
@@ -140,10 +140,10 @@ public class VisualizationEngine extends TimerTask {
         Sprite sprite = this.spriteManager.getSprite("" + userState.getPersonId());
         if (sprite == null) {
             if (graph.getEdge(userState.getEdgeId()) == null) {
-                System.out.println("Edge does not exist.");
+//                System.out.println("Edge does not exist.");
                 return null;
             }
-            System.out.println("Creating sprite...");
+//            System.out.println("Creating sprite...");
             sprite = this.spriteManager.addSprite("" + userState.getPersonId());
             sprite.attachToEdge(userState.getEdgeId());
             sprite.addAttribute("currentEdge", userState.getEdgeId());
