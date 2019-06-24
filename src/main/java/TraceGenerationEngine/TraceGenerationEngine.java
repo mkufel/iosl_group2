@@ -99,10 +99,9 @@ public class TraceGenerationEngine {
                     UserState userState = new UserState(i, currentStation, endStation, lineName, progress, false);
                     state.addUserState(userState);
                     progress += 0.2; //TODO: calculate progress based on length of leg
-                }
-                else { //User is at a station
+                } else { //User is at a station
                     ArrayList<ScheduleItem> scheduleFromStartStation = this.stopsWithSchedule.get(currentStation);
-                    if(scheduleFromStartStation != null) {
+                    if (scheduleFromStartStation != null) {
                         ScheduleItem nextScheduleItem = getNextScheduleItem(scheduleFromStartStation, tick, previousStation);
 
                         //Found a train in the next 5 minutes
@@ -113,6 +112,9 @@ public class TraceGenerationEngine {
                         UserState userState = new UserState(i, currentStation, endStation, lineName, progress, false);
                         state.addUserState(userState);
                         progress += 0.2; //TODO: calculate progress based on length of leg
+                    } else { // User stays at the station, as there are no trains to board
+                        UserState userState = new UserState(i, currentStation, endStation, lineName, 0.0, false);
+                        state.addUserState(userState);
                     }
                 }
 
@@ -130,15 +132,15 @@ public class TraceGenerationEngine {
     private ScheduleItem getNextScheduleItem(ArrayList<ScheduleItem> scheduleItems, int tick, Long previousStation) throws IOException {
         String startTime = this._getConfigValue("start_time");
         int currentTime = getAbsoluteTimeFromTick(startTime, tick);
-        ArrayList<ScheduleItem> scheduleItemsToBeConsidered= new ArrayList<>();
+        ArrayList<ScheduleItem> scheduleItemsToBeConsidered = new ArrayList<>();
 
-        for (ScheduleItem scheduleItem: scheduleItems) {
+        for (ScheduleItem scheduleItem : scheduleItems) {
             String dt = scheduleItem.getDeparture_time();
             String[] components = dt.split(":");
-            int departureTimeInSeconds = Integer.parseInt(components[0])*60*60
-                                            + Integer.parseInt(components[1])*60
-                                            + Integer.parseInt(components[2]);
-            if (departureTimeInSeconds > currentTime && departureTimeInSeconds - currentTime < 10*60 && !scheduleItem.getNextStop_id().equals(previousStation)) {
+            int departureTimeInSeconds = Integer.parseInt(components[0]) * 60 * 60
+                    + Integer.parseInt(components[1]) * 60
+                    + Integer.parseInt(components[2]);
+            if (departureTimeInSeconds > currentTime && departureTimeInSeconds - currentTime < 10 * 60 && !scheduleItem.getNextStop_id().equals(previousStation)) {
                 scheduleItemsToBeConsidered.add(scheduleItem);
             }
         }

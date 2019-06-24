@@ -115,15 +115,26 @@ public class VisualizationEngine extends TimerTask {
         }
         String spriteCurrentEdge = sprite.getAttribute("currentEdge");
         String stateCurrentEdge = userState.getEdgeId();
-
-//        System.out.println("State edge:" + stateCurrentEdge);
+        if (userState.hasData()) {
+            System.out.println(userState);
+        }
         if (!spriteCurrentEdge.equals(stateCurrentEdge)) {
-            System.out.println("Edges do not match");
-            sprite.detach();
-            sprite.attachToEdge(userState.getEdgeId());
+            if (!userState.getStationStart().equals(userState.getStationEnd())) {
+                System.out.println("Edges do not match");
+                sprite.detach();
+                sprite.attachToEdge(userState.getEdgeId());
+
+            } else if (userState.getStationStart().equals(userState.getStationEnd())) {
+                sprite.detach();
+                sprite.attachToNode("" + userState.getStationEnd());
+            }
         }
 
-        sprite.setPosition(userState.getProgress());
+        if (!userState.getStationStart().equals(userState.getStationEnd())) {
+            sprite.setPosition(userState.getProgress());
+
+        }
+
 
         if (userState.hasData()) {
             sprite.addAttribute("ui.class", "active");
@@ -140,10 +151,14 @@ public class VisualizationEngine extends TimerTask {
         Sprite sprite = this.spriteManager.getSprite("" + userState.getPersonId());
         if (sprite == null) {
             if (graph.getEdge(userState.getEdgeId()) == null) {
-//                System.out.println("Edge does not exist.");
-                return null;
+                if (userState.getStationStart().equals(userState.getStationEnd())) {
+                    sprite = this.spriteManager.addSprite("" + userState.getPersonId());
+                    sprite.attachToNode("" + userState.getStationEnd());
+                    sprite.addAttribute("currentEdge", userState.getEdgeId());
+                    return sprite;
+                }
+                return null; // Edge not found.
             }
-//            System.out.println("Creating sprite...");
             sprite = this.spriteManager.addSprite("" + userState.getPersonId());
             sprite.attachToEdge(userState.getEdgeId());
             sprite.addAttribute("currentEdge", userState.getEdgeId());
