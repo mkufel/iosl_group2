@@ -151,4 +151,13 @@ public class DisseminationEngine {
             state.calculateActiveAgents();
         }
     }
+
+    /**
+     * Set states for the dissemination engine.
+     *
+     * @param states The states to work on.
+     */
+    public void setStates(List<State> states) {
+        this.states = states;
+    }
 }

@@ -218,4 +218,13 @@ public class VisualizationEngine extends TimerTask {
     public void setOnVisualizationStateChangedListener(OnVisualizationStateChangedListener onVisualizationStateChangedListener) {
         this.onVisualizationStateChangedListener = onVisualizationStateChangedListener;
     }
+
+    /**
+     * Sets the states to visualize.
+     *
+     * @param states
+     */
+    public void setStates(List<State> states) {
+        this.states = states;
+    }
 }

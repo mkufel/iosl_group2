@@ -5,12 +5,14 @@ import org.graphstream.ui.swingViewer.ViewPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class VisualizationWindow extends JFrame {
 
     private VisualizationEngine visualizationEngine;
     private TraceGenerationEngine traceGenerationEngine;
     private ViewPanel graphView;
+    private OnSimulationReloadListener onSimulationReloadListener;
 
     private static class TextIndicator extends JTextField {
         TextIndicator() {
@@ -30,7 +32,8 @@ public class VisualizationWindow extends JFrame {
 
     /**
      * Initializes the Window for the visualization.
-     * @param engine The visualization engine that is runnning the simulation.
+     *
+     * @param engine                The visualization engine that is runnning the simulation.
      * @param traceGenerationEngine The trace generation engine that loads configurations.
      */
     public VisualizationWindow(VisualizationEngine engine,
@@ -44,6 +47,7 @@ public class VisualizationWindow extends JFrame {
 
     /**
      * Sets up default settings for the View.
+     *
      * @param graphView The Panel object that contains the GraphStream Graph.
      */
     private void setDefaultWindowConfigurations(ViewPanel graphView) {
@@ -61,6 +65,7 @@ public class VisualizationWindow extends JFrame {
 
     /**
      * Sets up the menu in the Window.
+     *
      * @return The JMenuBar object set up.
      */
     private JMenuBar createMenuBar() {
@@ -78,6 +83,7 @@ public class VisualizationWindow extends JFrame {
 
     /**
      * Sets up the Help menu.
+     *
      * @return The JMenu object.
      */
     private JMenu createHelpMenu() {
@@ -90,6 +96,7 @@ public class VisualizationWindow extends JFrame {
 
     /**
      * Sets up and adds listeners to the Edit menu.
+     *
      * @return The JMenu object.
      */
     private JMenu createEditMenu() {
@@ -107,19 +114,28 @@ public class VisualizationWindow extends JFrame {
         menuEdit.add(new JSeparator());
 
         menuEdit.add(new JMenuItem("Reload simulation"))
-                .addActionListener(e -> System.out.println("Reload pressed."));
+                .addActionListener(e -> {
+                    if (onSimulationReloadListener != null) {
+                        try {
+                            onSimulationReloadListener.reloadSimulation();
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                });
 
         menuEdit.add(new JMenuItem("Restart visualization"))
                 .addActionListener(e -> {
-            graphView.getCamera().resetView();
-            visualizationEngine.restart();
-        });
+                    graphView.getCamera().resetView();
+                    visualizationEngine.restart();
+                });
 
         return menuEdit;
     }
 
     /**
      * Sets up the File menu and adds listeners.
+     *
      * @return The JMenu object.
      */
     private JMenu createFileMenu() {
@@ -136,6 +152,7 @@ public class VisualizationWindow extends JFrame {
 
     /**
      * Creates the Toolbar in the window, sets up listeners.
+     *
      * @return The JToolBar object.
      */
     private JToolBar createToolBar() {
@@ -172,7 +189,7 @@ public class VisualizationWindow extends JFrame {
         buttonTickPrev.addActionListener(e -> {
             final int tick = visualizationEngine.getCurrentTick() - 1;
 
-            if(tick >= 0) {
+            if (tick >= 0) {
                 visualizationEngine.setCurrentTick(tick);
             }
         });
@@ -182,7 +199,7 @@ public class VisualizationWindow extends JFrame {
         buttonTickNext.addActionListener(e -> {
             final int tick = visualizationEngine.getCurrentTick() + 1;
 
-            if(tick <= traceGenerationEngine.getTotal_ticks() - 1) {
+            if (tick <= traceGenerationEngine.getTotal_ticks() - 1) {
                 visualizationEngine.setCurrentTick(tick);
             }
         });
@@ -211,5 +228,23 @@ public class VisualizationWindow extends JFrame {
         tools.addSeparator();
 
         return tools;
+    }
+
+    /**
+     * Returns the simulation reload listener.
+     *
+     * @return
+     */
+    public OnSimulationReloadListener getOnSimulationReloadListener() {
+        return onSimulationReloadListener;
+    }
+
+    /**
+     * Sets the listener to be called when the simulation is reloaded.
+     *
+     * @param onSimulationReloadListener The listener method.
+     */
+    public void setOnSimulationReloadListener(OnSimulationReloadListener onSimulationReloadListener) {
+        this.onSimulationReloadListener = onSimulationReloadListener;
     }
 }
