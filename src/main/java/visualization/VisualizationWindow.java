@@ -149,7 +149,9 @@ public class VisualizationWindow extends JFrame {
         sliderTick.setValue(0);
         sliderTick.setMinimum(0);
         sliderTick.setMaximum(traceGenerationEngine.getTotal_ticks());
-        sliderTick.addChangeListener(e -> visualizationEngine.setCurrentTick(sliderTick.getValue()));
+        sliderTick.addChangeListener(e -> {
+            visualizationEngine.setCurrentTick(sliderTick.getValue());
+        });
 
         JLabel labelActiveAgents = new JLabel("Active agents");
         TextIndicator fieldActiveAgents = new TextIndicator();
