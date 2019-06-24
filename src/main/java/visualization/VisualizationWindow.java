@@ -70,29 +70,13 @@ public class VisualizationWindow extends JFrame {
      */
     private JMenuBar createMenuBar() {
         JMenuBar menu = new JMenuBar();
-        JMenu menuFile = createFileMenu();
         JMenu menuEdit = createEditMenu();
-        JMenu menuHelp = createHelpMenu();
 
-        menu.add(menuFile);
         menu.add(menuEdit);
-        menu.add(menuHelp);
 
         return menu;
     }
 
-    /**
-     * Sets up the Help menu.
-     *
-     * @return The JMenu object.
-     */
-    private JMenu createHelpMenu() {
-        JMenu menuHelp = new JMenu("Help");
-
-        menuHelp.add(new JMenuItem("About"));
-
-        return menuHelp;
-    }
 
     /**
      * Sets up and adds listeners to the Edit menu.
@@ -144,22 +128,6 @@ public class VisualizationWindow extends JFrame {
         return menuEdit;
     }
 
-    /**
-     * Sets up the File menu and adds listeners.
-     *
-     * @return The JMenu object.
-     */
-    private JMenu createFileMenu() {
-        JMenu menuFile = new JMenu("File");
-
-        menuFile.add(new JMenuItem("Open"));
-        menuFile.add(new JMenuItem("Save as..."));
-        menuFile.add(new JSeparator());
-        menuFile.add(new JMenuItem("Settings"));
-        menuFile.add(new JMenuItem("Exit"));
-
-        return menuFile;
-    }
 
     /**
      * Creates the Toolbar in the window, sets up listeners.
@@ -243,6 +211,7 @@ public class VisualizationWindow extends JFrame {
 
     /**
      * Returns a loading dialog ready to be displayed.
+     *
      * @return A JDialog component to display
      */
     private JDialog getLoadingDialog() {

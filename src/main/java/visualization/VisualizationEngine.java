@@ -115,9 +115,6 @@ public class VisualizationEngine extends TimerTask {
         }
         String spriteCurrentEdge = sprite.getAttribute("currentEdge");
         String stateCurrentEdge = userState.getEdgeId();
-        if (userState.hasData()) {
-            System.out.println(userState);
-        }
         if (!spriteCurrentEdge.equals(stateCurrentEdge)) {
             if (!userState.getStationStart().equals(userState.getStationEnd())) {
                 System.out.println("Edges do not match");
