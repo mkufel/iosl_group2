@@ -4,8 +4,8 @@ import TraceGenerationEngine.TraceGenerationEngine;
 import org.graphstream.ui.swingViewer.ViewPanel;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.io.IOException;
 
 public class VisualizationWindow extends JFrame {
 
@@ -100,7 +100,7 @@ public class VisualizationWindow extends JFrame {
      * @return The JMenu object.
      */
     private JMenu createEditMenu() {
-        JMenu menuEdit = new JMenu("Edit");
+        JMenu menuEdit = new JMenu("Control");
 
         menuEdit.add(new JMenuItem("Pause/Resume"))
                 .addActionListener(e -> visualizationEngine.toggleSimulation());
@@ -116,15 +116,26 @@ public class VisualizationWindow extends JFrame {
         menuEdit.add(new JMenuItem("Reload simulation"))
                 .addActionListener(e -> {
                     if (onSimulationReloadListener != null) {
-                        try {
-                            onSimulationReloadListener.reloadSimulation();
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                        }
+                        JDialog dialog = getLoadingDialog();
+                        SwingWorker<Void, Void> reloadWorker = new SwingWorker<Void, Void>() {
+                            @Override
+                            protected Void doInBackground() throws Exception {
+                                visualizationEngine.setRunning(false);
+                                System.out.println("Reloading simulation...");
+                                onSimulationReloadListener.reloadSimulation();
+                                dialog.dispose();
+                                System.out.println("Reloaded simulation");
+                                return null;
+                            }
+
+                        };
+                        reloadWorker.execute();
+                        dialog.setVisible(true);
+
                     }
                 });
 
-        menuEdit.add(new JMenuItem("Restart visualization"))
+        menuEdit.add(new JMenuItem("Restart from beginning"))
                 .addActionListener(e -> {
                     graphView.getCamera().resetView();
                     visualizationEngine.restart();
@@ -228,6 +239,24 @@ public class VisualizationWindow extends JFrame {
         tools.addSeparator();
 
         return tools;
+    }
+
+    /**
+     * Returns a loading dialog ready to be displayed.
+     * @return A JDialog component to display
+     */
+    private JDialog getLoadingDialog() {
+        final JDialog loadingDialog = new JDialog(this);
+        JPanel p1 = new JPanel(new BorderLayout());
+        p1.setBorder(new EmptyBorder(20, 20, 20, 20));
+        p1.add(new JLabel("Please wait..."), BorderLayout.CENTER);
+        loadingDialog.setUndecorated(true);
+        loadingDialog.getContentPane().add(p1);
+        loadingDialog.pack();
+        loadingDialog.setLocationRelativeTo(this);
+        loadingDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        loadingDialog.setModal(true);
+        return loadingDialog;
     }
 
     /**

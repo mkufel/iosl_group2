@@ -59,7 +59,7 @@ public class DisseminationEngine {
     public List<TrainState> findEligibleAgents(List<UserState> states) {
 
         List<UserState> statesAtEndOfLeg = states.stream()
-                .filter(state -> state.getProgress() >= 1).collect(Collectors.toList());
+                .filter(state -> state.getProgress() >= 0.8).collect(Collectors.toList());
         // statesAtEndOfLeg = states;
         // Map of startStationId + endStationId as key
         Map<String, TrainState> trains = new HashMap<>();
