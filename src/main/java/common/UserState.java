@@ -90,10 +90,6 @@ public class UserState {
     }
 
     public String getEdgeId() {
-        if (stationStart > stationEnd) {
-            return stationEnd + "_" + stationStart;
-        } else {
             return stationStart + "_" + stationEnd;
-        }
     }
 }
