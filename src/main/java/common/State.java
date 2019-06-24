@@ -14,6 +14,10 @@ public class State {
     public State(int tick, List<UserState> users) {
         this.tick = tick;
         this.userStates = users;
+        calculateActiveAgents();
+    }
+
+    public void calculateActiveAgents() {
         this.activeAgents = this.userStates.stream()
                 .reduce(0, (totalActive, user) -> totalActive + (user.hasData() ? 1 : 0), Integer::sum);
     }

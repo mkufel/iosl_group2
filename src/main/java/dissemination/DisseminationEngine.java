@@ -26,10 +26,9 @@ public class DisseminationEngine {
      */
     public List<State> calculateDissemination() {
 
-        for(int i = 0; i < states.size(); i++)
-        {
+        for (int i = 0; i < states.size(); i++) {
             State state = states.get(i);
-            if(state.getUserStates() != null && state.getUserStates().size() > 0) {
+            if (state.getUserStates() != null && state.getUserStates().size() > 0) {
                 state.getUserStates().get(0).setData(true);
                 persistDataTransfer(state, state.getUserStates().get(0));
                 break;
@@ -45,7 +44,7 @@ public class DisseminationEngine {
                 }
             }
         }
-        
+
         return this.states;
     }
 
@@ -118,9 +117,9 @@ public class DisseminationEngine {
             return false;
         }
 
-       if (!RANDOM.nextBoolean()) {
-           return false;
-       }
+        if (!RANDOM.nextBoolean()) {
+            return false;
+        }
 
         pair.getReceiver().setData(true);
 
@@ -149,6 +148,7 @@ public class DisseminationEngine {
                     break;
                 }
             }
+            state.calculateActiveAgents();
         }
     }
 }
