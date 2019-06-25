@@ -394,6 +394,8 @@ public class InitEngine {
             e.printStackTrace();
         }
 
+        stopsToScheduleItems = this.removeInvalidScheduleItems(stopsToScheduleItems);
+
         return stopsToScheduleItems;
     }
 
@@ -503,4 +505,61 @@ public class InitEngine {
         return mapStationsToDuplicateIds;
     }
 
+
+    /**
+     * Removed Schedule items that lead to non-adjacent stations (not directly preceeding and directly suceeding) a given station.
+     * Such items appear sporadically in the BVG schedule, we remove them to prevent errors in the Map/Graph which has
+     * only edges between adjacent stations.
+     * @param stopsToScheduleItems
+     * @return
+     */
+    private Map<Long, ArrayList<ScheduleItem>> removeInvalidScheduleItems(Map<Long, ArrayList<ScheduleItem>> stopsToScheduleItems) {
+
+        // Create a copy of the map to prevent the problem of concurrent modification while looping through
+        Map<Long, ArrayList<ScheduleItem>> stopsToScheduleItemsCopy = new HashMap<>();
+        stopsToScheduleItems
+                .keySet()
+                .forEach(x -> stopsToScheduleItemsCopy.put(x, new ArrayList<>()));
+
+        // Loop through the ScheduleItems
+        for (Long stopId : stopsToScheduleItems.keySet()) {
+            ArrayList<Long> possibleNextStops = getListOfPossibleNextStops(stopId);
+            for (ScheduleItem item : stopsToScheduleItems.get(stopId)) {
+
+                // If found a schedule item that leads to an adjacent station, add it to the copy of the Map
+                if (possibleNextStops.contains(item.getNextStop_id())) {
+                    ArrayList<ScheduleItem> tempItems = stopsToScheduleItemsCopy.get(stopId);
+                    tempItems.add(item);
+                    stopsToScheduleItemsCopy.put(stopId, tempItems);
+                }
+            }
+        }
+
+        return stopsToScheduleItemsCopy;
+    }
+
+    /**
+     * Returns a list of stopIDs of adjacent stops (directly preceeding and suceeding) the stopId in any of the uBahn lines
+     * @param stopId
+     * @return
+     */
+    private ArrayList<Long> getListOfPossibleNextStops(Long stopId) {
+        ArrayList<Long> stops = new ArrayList<>();
+
+        for (String route : routesToStations.keySet()) {
+            ArrayList<Station> routeStations = routesToStations.get(route);
+            for (int i = 0; i < routeStations.size(); i++) {
+                if (routeStations.get(i).getId().equals(stopId)) {
+                    try {
+                        stops.add(routeStations.get(i - 1).getId());
+                    } catch (Exception e) {}
+                    try{
+                        stops.add(routeStations.get(i + 1).getId());
+                    } catch (Exception e) {}
+                }
+            }
+        }
+
+        return stops;
+    }
 }

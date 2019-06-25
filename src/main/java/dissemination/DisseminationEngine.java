@@ -117,9 +117,9 @@ public class DisseminationEngine {
             return false;
         }
 
-        if (!RANDOM.nextBoolean()) {
-            return false;
-        }
+//        if (!RANDOM.nextBoolean()) {
+//            return false;
+//        }
 
         pair.getReceiver().setData(true);
 

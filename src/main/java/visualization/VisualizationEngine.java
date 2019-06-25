@@ -154,6 +154,7 @@ public class VisualizationEngine extends TimerTask {
                     sprite.addAttribute("currentEdge", userState.getEdgeId());
                     return sprite;
                 }
+                System.out.println("Edge " + userState.getStationStart()+ "_" + userState.getStationEnd() + " does not exist.");
                 return null; // Edge not found.
             }
             sprite = this.spriteManager.addSprite("" + userState.getPersonId());

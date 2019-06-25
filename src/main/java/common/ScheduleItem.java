@@ -23,4 +23,8 @@ public class ScheduleItem {
     public Long getNextStop_id() {
         return nextStop_id;
     }
+
+    public void setNextStop_id(Long nextStop_id) {
+        this.nextStop_id = nextStop_id;
+    }
 }
