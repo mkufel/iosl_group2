@@ -156,7 +156,7 @@ public class TraceGenerationEngine {
     }
 
 
-    private int getAbsoluteTimeFromTick(String startTime, int tick) throws IOException {
+    public int getAbsoluteTimeFromTick(String startTime, int tick) throws IOException {
         //Each tick is 30 seconds
         int timeElapsedSinceStart = tick * 30;
         return Integer.parseInt(startTime) * 60 * 60 + timeElapsedSinceStart;

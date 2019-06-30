@@ -6,6 +6,9 @@ import org.graphstream.ui.swingViewer.ViewPanel;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 public class VisualizationWindow extends JFrame {
 
@@ -14,9 +17,15 @@ public class VisualizationWindow extends JFrame {
     private ViewPanel graphView;
     private OnSimulationReloadListener onSimulationReloadListener;
 
+    private String startHour;
+
     private static class TextIndicator extends JTextField {
         TextIndicator() {
-            super(4);
+            this(4);
+        }
+
+        TextIndicator(int width) {
+            super(width);
             this.setEditable(false);
             this.setFocusable(false);
             this.setHorizontalAlignment(SwingConstants.CENTER);
@@ -37,8 +46,21 @@ public class VisualizationWindow extends JFrame {
      * @param traceGenerationEngine The trace generation engine that loads configurations.
      */
     public VisualizationWindow(VisualizationEngine engine,
-                               TraceGenerationEngine traceGenerationEngine) {
+                               TraceGenerationEngine traceGenerationEngine) throws IOException {
         super("Dissemination Visualization");
+
+        try(InputStream input = getClass().getClassLoader().getResourceAsStream("config.properties")) {
+            if (input == null) {
+                System.out.println("Unable to load config");
+                return;
+            }
+
+            Properties prop = new Properties();
+            prop.load(input);
+
+            this.startHour = prop.getProperty("start_time");
+        }
+
         this.visualizationEngine = engine;
         this.traceGenerationEngine = traceGenerationEngine;
         this.graphView = engine.getViewPanel();
@@ -50,7 +72,7 @@ public class VisualizationWindow extends JFrame {
      *
      * @param graphView The Panel object that contains the GraphStream Graph.
      */
-    private void setDefaultWindowConfigurations(ViewPanel graphView) {
+    private void setDefaultWindowConfigurations(ViewPanel graphView) throws IOException {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         this.setJMenuBar(this.createMenuBar());
@@ -134,14 +156,14 @@ public class VisualizationWindow extends JFrame {
      *
      * @return The JToolBar object.
      */
-    private JToolBar createToolBar() {
+    private JToolBar createToolBar() throws IOException {
         JToolBar tools = new JToolBar();
 
         tools.setFloatable(false);
         tools.setRollover(true);
         tools.setLayout(new FlowLayout(FlowLayout.LEFT));
 
-        JLabel labelSimulatedPopulation = new JLabel("Simulated population");
+        JLabel labelSimulatedPopulation = new JLabel("Agents");
         TextIndicator fieldSimulatedPopulation = new TextIndicator();
         fieldSimulatedPopulation.setText(Integer.toString(traceGenerationEngine.getTotal_users()));
 
@@ -149,17 +171,19 @@ public class VisualizationWindow extends JFrame {
         sliderTick.setValue(0);
         sliderTick.setMinimum(0);
         sliderTick.setMaximum(traceGenerationEngine.getTotal_ticks());
-        sliderTick.addChangeListener(e -> {
-            visualizationEngine.setCurrentTick(sliderTick.getValue());
-        });
+        sliderTick.addChangeListener(e -> visualizationEngine.setCurrentTick(sliderTick.getValue()));
 
-        JLabel labelActiveAgents = new JLabel("Active agents");
+        JLabel labelActiveAgents = new JLabel("Have data");
         TextIndicator fieldActiveAgents = new TextIndicator();
         fieldActiveAgents.setText("0");
 
+        JLabel labelClock = new JLabel("Time");
+        TextIndicator fieldClock = new TextIndicator(8);
+        fieldClock.setText(Integer.toString(traceGenerationEngine.getAbsoluteTimeFromTick(startHour, 0)));
+
         JLabel labelTick = new JLabel("Tick");
         TextIndicator fieldTick = new TextIndicator();
-        fieldTick.setText("0");
+        fieldTick.setText("1");
 
         JLabel labelDissemination = new JLabel("Dissemination");
         TextIndicator fieldDissemination = new TextIndicator();
@@ -186,7 +210,21 @@ public class VisualizationWindow extends JFrame {
         });
 
         visualizationEngine.setOnVisualizationStateChangedListener((tick, activeAgents, disseminationFactor) -> {
-            fieldTick.setText(Integer.toString(tick));
+            int timeH, timeM, timeS;
+
+            try {
+                int t = traceGenerationEngine.getAbsoluteTimeFromTick(startHour, tick);
+                timeH = t / 3600;
+                timeM = (t % 3600) / 60;
+                timeS = t % 60;
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+                timeH = timeM = timeS = 0;
+            }
+
+            fieldClock.setText(String.format("%02d:%02d:%02d", timeH, timeM, timeS));
+            fieldTick.setText(Integer.toString(tick + 1));
             sliderTick.setValue(tick);
             fieldActiveAgents.setText(Integer.toString(activeAgents));
             fieldDissemination.setText(String.format("%.2f%%", disseminationFactor));
@@ -197,6 +235,9 @@ public class VisualizationWindow extends JFrame {
         tools.addSeparator();
         tools.add(labelActiveAgents);
         tools.add(fieldActiveAgents);
+        tools.addSeparator();
+        tools.add(labelClock);
+        tools.add(fieldClock);
         tools.addSeparator();
         tools.add(labelTick);
         tools.add(buttonTickPrev);
