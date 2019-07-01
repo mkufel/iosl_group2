@@ -87,7 +87,7 @@ public class Map2GraphConverter {
     public static String readFile() throws IOException {
 //        System.out.println("Working Directory = " +
 //                System.getProperty("user.dir"));
-        File file = new File("src/main/resources/map-styles.css");
+        File file = new File("resources/map-styles.css");
 
         return FileUtils.readFileToString(file, "utf-8");
     }
