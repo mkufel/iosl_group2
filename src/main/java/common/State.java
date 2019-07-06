@@ -2,14 +2,17 @@ package common;
 
 import java.util.List;
 
+/**
+ * Simulation state identified by the tick.
+ *
+ * Contains states of all agents that are present in the simulation at the given tick.
+ */
 public class State {
     private int tick;
 
     private List<UserState> userStates;
 
     private int activeAgents;
-
-    private double disseminationFactor;
 
     public State(int tick, List<UserState> users) {
         this.tick = tick;

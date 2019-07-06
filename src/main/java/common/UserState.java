@@ -1,5 +1,10 @@
 package common;
 
+/**
+ * State of a single agent.
+ *
+ * Stores position of the agent and whether the agent has the data.
+ */
 public class UserState {
     private int personId;
 

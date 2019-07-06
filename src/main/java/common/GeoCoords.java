@@ -1,5 +1,10 @@
 package common;
 
+/**
+ * Geographical point.
+ *
+ * Represented as a pair of [lon, lat] coordinates.
+ */
 public class GeoCoords {
     private double lon;
     private double lat;
@@ -7,9 +12,6 @@ public class GeoCoords {
     public GeoCoords(double lat, double lon) {
         this.lon = lon;
         this.lat = lat;
-    }
-
-    public GeoCoords() {
     }
 
     public double getLon() {

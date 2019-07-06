@@ -1,5 +1,10 @@
 package common;
 
+/**
+ * Metro station.
+ *
+ * Described by it's id, name and geographical position.
+ */
 public class Station {
     private Long id;
 
@@ -64,7 +69,7 @@ public class Station {
     }
 
     public boolean equals(Object object) {
-        if(object instanceof Station && ((Station)object).getId() == this.id) {
+        if(object instanceof Station && ((Station)object).getId().equals(this.id)) {
             return true;
         } else {
             return false;

@@ -1,10 +1,9 @@
 package common;
 
 public class ScheduleItem {
-
-    String line_name;
-    String departure_time;
-    Long nextStop_id;
+    private String line_name;
+    private String departure_time;
+    private Long nextStop_id;
 
     public ScheduleItem(String line_name, String departure_time, Long nextStop_id) {
         this.line_name = line_name;
