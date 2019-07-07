@@ -1,21 +1,32 @@
 package common;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * State of a single agent.
  *
  * Stores position of the agent and whether the agent has the data.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserState {
+
+    @JsonProperty("personId")
     private int personId;
 
+    @JsonProperty("stationStart")
     private Long stationStart;
 
+    @JsonProperty("stationEnd")
     private Long stationEnd;
 
+    @JsonProperty("line")
     private String line;
 
+    @JsonProperty("progress")
     private double progress;
 
+    @JsonProperty("data")
     private boolean data;
 
     public UserState() {}

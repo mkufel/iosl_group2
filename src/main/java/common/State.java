@@ -1,5 +1,8 @@
 package common;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 /**
@@ -7,18 +10,31 @@ import java.util.List;
  *
  * Contains states of all agents that are present in the simulation at the given tick.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class State {
+
+    @JsonProperty("tick")
     private int tick;
 
+    @JsonProperty("userStates")
     private List<UserState> userStates;
 
+    @JsonProperty("activeAgents")
     private int activeAgents;
+
+    public State(int tick, List<UserState> userStates, int activeAgents) {
+        this.tick = tick;
+        this.userStates = userStates;
+        this.activeAgents = activeAgents;
+    }
 
     public State(int tick, List<UserState> users) {
         this.tick = tick;
         this.userStates = users;
         calculateActiveAgents();
     }
+
+    public State() {}
 
     public void calculateActiveAgents() {
         this.activeAgents = this.userStates.stream()
