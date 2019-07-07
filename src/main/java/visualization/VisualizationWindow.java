@@ -1,13 +1,18 @@
 package visualization;
 
 import TraceGenerationEngine.TraceGenerationEngine;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import common.State;
 import org.graphstream.ui.swingViewer.ViewPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -128,11 +133,34 @@ public class VisualizationWindow extends JFrame {
      */
     private JMenuBar createMenuBar() {
         JMenuBar menu = new JMenuBar();
-        JMenu menuEdit = createMenu();
-
-        menu.add(menuEdit);
+        menu.add(createFileMenu());
+        menu.add(createMenu());
 
         return menu;
+    }
+
+    /**
+     * Creates the File menu in the window.
+     *
+     * @return The JMenu object.
+     */
+    private JMenu createFileMenu() {
+        JMenu menuFile = new JMenu("File");
+        menuFile.add(new JMenuItem("Open")).addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            if (fileChooser.showOpenDialog(rootPane) == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                try {
+                    onReloadListener.onReload(file.getAbsolutePath());
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+        menuFile.add(new JMenuItem("Save as JSON")).addActionListener(e -> {
+            serializeStatesToJSON(visualizationEngine.getStates());
+        });
+        return menuFile;
     }
 
     /**
@@ -166,7 +194,7 @@ public class VisualizationWindow extends JFrame {
 
                                 System.out.println("Reloading simulation...");
 
-                                onReloadListener.onReload();
+                                onReloadListener.onReload(null);
                                 dialog.dispose();
 
                                 System.out.println("Simulation reloaded");
@@ -348,6 +376,26 @@ public class VisualizationWindow extends JFrame {
         loadingDialog.setModal(true);
 
         return loadingDialog;
+    }
+
+    /**
+     * Serializes a list of states to JSON for efficient visualization
+     *
+     * @param states a list of user states, input to the visualization engine
+     */
+    private static void serializeStatesToJSON(List<State> states) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            //Convert object to JSON string and save into file directly
+            String fileName = "exports/dissemination_export_" + new Date().getTime() + ".json";
+            File saveFile = new File(fileName);
+            boolean mkdirs = saveFile.getParentFile().mkdirs();
+            boolean createdFile = saveFile.createNewFile();
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(saveFile, states);
+        } catch (Exception e) {
+            System.out.println("Failed to parse the list of states to JSON ");
+            e.printStackTrace();
+        }
     }
 
     /**

@@ -272,4 +272,8 @@ public class VisualizationEngine extends TimerTask {
         Set<Object> seen = ConcurrentHashMap.newKeySet();
         return t -> seen.add(keyExtractor.apply(t));
     }
+
+    public List<State> getStates() {
+        return states;
+    }
 }
