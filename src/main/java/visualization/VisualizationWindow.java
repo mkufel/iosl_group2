@@ -163,9 +163,13 @@ public class VisualizationWindow extends JFrame {
         tools.setRollover(true);
         tools.setLayout(new FlowLayout(FlowLayout.LEFT));
 
-        JLabel labelSimulatedPopulation = new JLabel("Agents");
+        JLabel labelSimulatedPopulation = new JLabel("Simulated population");
         TextIndicator fieldSimulatedPopulation = new TextIndicator();
         fieldSimulatedPopulation.setText(Integer.toString(traceGenerationEngine.getTotal_users()));
+
+        JLabel labelCurrentPopulation = new JLabel("Active users");
+        TextIndicator fieldCurrentPopulation = new TextIndicator();
+        fieldCurrentPopulation.setText("0");
 
         JSlider sliderTick = new JSlider(SwingConstants.HORIZONTAL);
         sliderTick.setValue(0);
@@ -173,7 +177,7 @@ public class VisualizationWindow extends JFrame {
         sliderTick.setMaximum(traceGenerationEngine.getTotal_ticks());
         sliderTick.addChangeListener(e -> visualizationEngine.setCurrentTick(sliderTick.getValue()));
 
-        JLabel labelActiveAgents = new JLabel("Have data");
+        JLabel labelActiveAgents = new JLabel("Data carriers");
         TextIndicator fieldActiveAgents = new TextIndicator();
         fieldActiveAgents.setText("0");
 
@@ -185,9 +189,14 @@ public class VisualizationWindow extends JFrame {
         TextIndicator fieldTick = new TextIndicator();
         fieldTick.setText("1");
 
-        JLabel labelDissemination = new JLabel("Dissemination");
+        JLabel labelDissemination = new JLabel("Current dissemination");
         TextIndicator fieldDissemination = new TextIndicator();
         fieldDissemination.setText("0");
+
+        JLabel labelFinalDisseminatation = new JLabel("Total dissemination");
+        TextIndicator fieldFinalDissemination = new TextIndicator();
+        fieldFinalDissemination.setText("-");
+
 
         Button buttonTickPrev = new Button("-");
         buttonTickPrev.setPreferredSize(new Dimension(25, 25));
@@ -209,7 +218,7 @@ public class VisualizationWindow extends JFrame {
             }
         });
 
-        visualizationEngine.setOnVisualizationStateChangedListener((tick, activeAgents, disseminationFactor) -> {
+        visualizationEngine.setOnVisualizationStateChangedListener((tick, allAgents, activeAgents, disseminationFactor) -> {
             int timeH, timeM, timeS;
 
             try {
@@ -223,30 +232,47 @@ public class VisualizationWindow extends JFrame {
                 timeH = timeM = timeS = 0;
             }
 
+            if (tick == traceGenerationEngine.getTotal_ticks() - 1) {
+                fieldFinalDissemination.setText(String.format("%.2f%%", visualizationEngine.getTotalNumberOfUsersWithData() * 100 /traceGenerationEngine.getTotal_users()));
+            }
+
             fieldClock.setText(String.format("%02d:%02d:%02d", timeH, timeM, timeS));
             fieldTick.setText(Integer.toString(tick + 1));
             sliderTick.setValue(tick);
             fieldActiveAgents.setText(Integer.toString(activeAgents));
-            fieldDissemination.setText(String.format("%.2f%%", disseminationFactor));
+            fieldCurrentPopulation.setText(Integer.toString(allAgents));
+            fieldDissemination.setText(String.format("%.2f%%", disseminationFactor * 100));
         });
 
         tools.add(labelSimulatedPopulation);
         tools.add(fieldSimulatedPopulation);
         tools.addSeparator();
+
+        tools.add(labelCurrentPopulation);
+        tools.add(fieldCurrentPopulation);
+        tools.addSeparator();
+
         tools.add(labelActiveAgents);
         tools.add(fieldActiveAgents);
         tools.addSeparator();
+
+        tools.add(labelDissemination);
+        tools.add(fieldDissemination);
+        tools.addSeparator();
+
         tools.add(labelClock);
         tools.add(fieldClock);
         tools.addSeparator();
+
         tools.add(labelTick);
         tools.add(buttonTickPrev);
         tools.add(fieldTick);
         tools.add(buttonTickNext);
         tools.add(sliderTick);
         tools.addSeparator();
-        tools.add(labelDissemination);
-        tools.add(fieldDissemination);
+
+        tools.add(labelFinalDisseminatation);
+        tools.add(fieldFinalDissemination);
         tools.addSeparator();
 
         return tools;

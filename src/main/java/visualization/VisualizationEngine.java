@@ -1,6 +1,7 @@
 package visualization;
 
 import common.State;
+import common.Station;
 import common.UserState;
 import org.graphstream.graph.Graph;
 import org.graphstream.ui.spriteManager.Sprite;
@@ -8,9 +9,10 @@ import org.graphstream.ui.spriteManager.SpriteManager;
 import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.view.Viewer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TimerTask;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Responsible for visualizing States on a GraphStream graph.
@@ -86,7 +88,7 @@ public class VisualizationEngine extends TimerTask {
         }
 
         if (this.onVisualizationStateChangedListener != null) {
-            this.onVisualizationStateChangedListener.onTick(this.currentTick, currentState.getActiveAgents(), currentState.getDisseminationFactor());
+            this.onVisualizationStateChangedListener.onTick(this.currentTick, currentState.getUserStates().size(), currentState.getActiveAgents(), currentState.getDisseminationFactor());
         }
 
     }
@@ -239,5 +241,23 @@ public class VisualizationEngine extends TimerTask {
      */
     public void setStates(List<State> states) {
         this.states = states;
+    }
+
+    public double getTotalNumberOfUsersWithData() {
+        ArrayList<UserState> userStates = new ArrayList<>();
+
+        states.stream()
+            .forEach(state -> state.getUserStates().stream()
+                .filter(UserState::hasData)
+                .forEach(userStateWithData -> userStates.add(userStateWithData)));
+
+        return userStates.stream()
+                .filter(distinctByKey(UserState::getPersonId))
+                .count();
+    }
+
+    private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
     }
 }
