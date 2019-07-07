@@ -13,39 +13,36 @@ import java.util.List;
 import java.util.Timer;
 
 public class App {
-
-    public static void main(String[] argv) {
+    public static void main(String[] argv) throws IOException {
         System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 
         Timer timer = new Timer(true);
 
-        try {
-            InitEngine initEngine = new InitEngine();
-            Map berlinMap = initEngine.createMapFromBVGFiles();
-            TraceGenerationEngine traceEngine = new TraceGenerationEngine(initEngine);
+        InitEngine initEngine = new InitEngine();
+        Map berlinMap = initEngine.createMapFromBVGFiles();
 
-            DisseminationEngine disseminationEngine = new DisseminationEngine(traceEngine.getStates());
-            List<State> states = disseminationEngine.calculateDissemination();
+        TraceGenerationEngine traceEngine = new TraceGenerationEngine(initEngine);
+        DisseminationEngine disseminationEngine = new DisseminationEngine(traceEngine.getStates());
 
-            VisualizationEngine visualizationEngine = new VisualizationEngine(Map2GraphConverter.convert(berlinMap), states);
-            VisualizationWindow visualizationWindow = new VisualizationWindow(visualizationEngine, traceEngine);
+        List<State> states = disseminationEngine.calculateDissemination();
 
-            visualizationWindow.setOnSimulationReloadListener(() -> {
-                disseminationEngine.setStates(traceEngine.getStates());
-                List<State> newStates = disseminationEngine.calculateDissemination();
-                visualizationEngine.setRunning(false);
-                visualizationEngine.setStates(newStates);
-                visualizationEngine.restart();
-            });
+        VisualizationEngine visualizationEngine = new VisualizationEngine(Map2GraphConverter.convert(berlinMap), states);
+        VisualizationWindow visualizationWindow = new VisualizationWindow(visualizationEngine, traceEngine);
 
-            System.out.println("Drawing user states on the map...");
-            visualizationEngine.setRunning(true);
-            visualizationWindow.setVisible(true);
+        visualizationWindow.setOnReloadListener(() -> {
+            disseminationEngine.setStates(traceEngine.getStates());
+            List<State> newStates = disseminationEngine.calculateDissemination();
+            visualizationEngine.setRunning(false);
+            visualizationEngine.setStates(newStates);
+            visualizationEngine.restart();
+        });
 
-            // TODO Encapsulate timer in one of the visualization classes
-            timer.scheduleAtFixedRate(visualizationEngine, 0, 1000);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println("Drawing user states on the map...");
+
+        visualizationEngine.setRunning(true);
+        visualizationWindow.setVisible(true);
+
+        // Controls how fast ticks should change in the visualization
+        timer.scheduleAtFixedRate(visualizationEngine, 0, 1000);
     }
 }

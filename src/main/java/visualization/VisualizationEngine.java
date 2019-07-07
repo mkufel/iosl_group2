@@ -23,13 +23,12 @@ public class VisualizationEngine extends TimerTask {
     private boolean isRunning = false;
 
     private Graph graph;
-    private Viewer viewer;
     private ViewPanel viewPanel;
     private SpriteManager spriteManager;
 
     private List<State> states;
 
-    private OnVisualizationStateChangedListener onVisualizationStateChangedListener;
+    private OnTickListener onTickListener;
 
     /**
      * Initializes the visualization engine with the given graph and states
@@ -40,14 +39,14 @@ public class VisualizationEngine extends TimerTask {
     public VisualizationEngine(Graph graph, List<State> states) {
         this.graph = graph;
 
-        this.viewer = new Viewer(this.graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
-        this.viewer.disableAutoLayout();
-        this.viewer.enableXYZfeedback(true);
-        this.viewPanel = this.viewer.addDefaultView(false);
+        Viewer viewer = new Viewer(this.graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
+        viewer.disableAutoLayout();
+        viewer.enableXYZfeedback(true);
+
+        this.viewPanel = viewer.addDefaultView(false);
         this.spriteManager = new SpriteManager(graph);
         this.states = states;
     }
-
 
     /**
      * Gets the ViewPanel for display
@@ -81,14 +80,14 @@ public class VisualizationEngine extends TimerTask {
 
         removeOldSpritesFromGraph();
 
-//        System.out.println("Drawing state at tick: " + currentTick);
         State currentState = this.states.get(currentTick);
         for (UserState userState : currentState.getUserStates()) {
             this.drawUserState(userState);
         }
 
-        if (this.onVisualizationStateChangedListener != null) {
-            this.onVisualizationStateChangedListener.onTick(this.currentTick, currentState.getUserStates().size(), currentState.getActiveAgents(), currentState.getDisseminationFactor());
+        if (this.onTickListener != null) {
+            this.onTickListener
+                    .onTick(this.currentTick, currentState.getUserStates().size(), currentState.getActiveAgents(), currentState.getDisseminationFactor());
         }
 
     }
@@ -112,11 +111,14 @@ public class VisualizationEngine extends TimerTask {
      */
     private void drawUserState(UserState userState) {
         Sprite sprite = createSpriteIfDoesNotExist(userState);
+
         if (sprite == null) {
             return;
         }
+
         String spriteCurrentEdge = sprite.getAttribute("currentEdge");
         String stateCurrentEdge = userState.getEdgeId();
+
         if (!spriteCurrentEdge.equals(stateCurrentEdge)) {
             if (!userState.getStationStart().equals(userState.getStationEnd())) {
                 System.out.println("Edges do not match");
@@ -131,9 +133,7 @@ public class VisualizationEngine extends TimerTask {
 
         if (!userState.getStationStart().equals(userState.getStationEnd())) {
             sprite.setPosition(userState.getProgress());
-
         }
-
 
         if (userState.hasData()) {
             sprite.addAttribute("ui.class", "active");
@@ -148,25 +148,30 @@ public class VisualizationEngine extends TimerTask {
      */
     private Sprite createSpriteIfDoesNotExist(UserState userState) {
         Sprite sprite = this.spriteManager.getSprite("" + userState.getPersonId());
+
         if (sprite == null) {
             if (graph.getEdge(userState.getEdgeId()) == null) {
                 if (userState.getStationStart().equals(userState.getStationEnd())) {
                     sprite = this.spriteManager.addSprite("" + userState.getPersonId());
                     sprite.attachToNode("" + userState.getStationEnd());
                     sprite.addAttribute("currentEdge", userState.getEdgeId());
+
                     return sprite;
                 }
-                System.out.println("Edge " + userState.getStationStart()+ "_" + userState.getStationEnd() + " does not exist.");
+
+                System.out.println("Edge " + userState.getStationStart() + "_" + userState.getStationEnd() + " does not exist.");
+
                 return null; // Edge not found.
             }
+
             sprite = this.spriteManager.addSprite("" + userState.getPersonId());
             sprite.attachToEdge(userState.getEdgeId());
             sprite.addAttribute("currentEdge", userState.getEdgeId());
             sprite.setPosition(0);
         }
+
         return sprite;
     }
-
 
     /**
      * Turns the simulation on or off.
@@ -221,23 +226,21 @@ public class VisualizationEngine extends TimerTask {
     /**
      * Returns the listener for Visualization state changes.
      */
-    public OnVisualizationStateChangedListener getOnVisualizationStateChangedListener() {
-        return onVisualizationStateChangedListener;
+    public OnTickListener getOnTickListener() {
+        return onTickListener;
     }
 
     /**
      * Sets the listener for visualization state changes.
      *
-     * @param onVisualizationStateChangedListener The listener interface.
+     * @param onTickListener The listener interface.
      */
-    public void setOnVisualizationStateChangedListener(OnVisualizationStateChangedListener onVisualizationStateChangedListener) {
-        this.onVisualizationStateChangedListener = onVisualizationStateChangedListener;
+    public void setOnTickListener(OnTickListener onTickListener) {
+        this.onTickListener = onTickListener;
     }
 
     /**
      * Sets the states to visualize.
-     *
-     * @param states
      */
     public void setStates(List<State> states) {
         this.states = states;

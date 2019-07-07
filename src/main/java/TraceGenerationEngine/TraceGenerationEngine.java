@@ -11,6 +11,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+
+
+/**
+ * This class is reponsible for generating the user traces using data from the InitEngine
+ */
 public class TraceGenerationEngine {
     InitEngine initEngine;
     ArrayList<Station> allUBahnStations;
@@ -68,6 +73,11 @@ public class TraceGenerationEngine {
         return result;
     }
 
+
+    /**
+     * Returns the list of states for all the ticks and users in the simulation
+     * as specified in config.properties
+     */
     public List<State> getStates() throws IOException {
         ArrayList<State> states = new ArrayList<>();
         loadInitialPopulationValues();
@@ -129,6 +139,15 @@ public class TraceGenerationEngine {
         return states;
     }
 
+
+    /**
+     * Contains logic for calculating the next train to board given a list of trains leaving from the current station
+     *
+     * @param scheduleItems A list of all trains departing from a given station throughout the day
+     * @param tick The current tick for which we require a departing train
+     * @param previousStation The station from which the user just arrived, to avoid the case where the user goes back to the same station
+     * @return ScheduleItem One element of the scheduleItems based on the logic of the function
+     */
     private ScheduleItem getNextScheduleItem(ArrayList<ScheduleItem> scheduleItems, int tick, Long previousStation) throws IOException {
         String startTime = this._getConfigValue("start_time");
         int currentTime = getAbsoluteTimeFromTick(startTime, tick);
@@ -174,6 +193,10 @@ public class TraceGenerationEngine {
     }
 
 
+    /**
+     * Contains logic to select the start station based on the "popularity score" of each station
+     * as specified in config.properties
+     */
     private Station getStartStation() throws IOException {
         ArrayList<Long> station_ids = new ArrayList<>();
         ArrayList<Double> popularities = new ArrayList<>();
