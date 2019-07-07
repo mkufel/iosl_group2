@@ -1,7 +1,6 @@
 package visualization;
 
 import common.State;
-import common.Station;
 import common.UserState;
 import org.graphstream.graph.Graph;
 import org.graphstream.ui.spriteManager.Sprite;
@@ -9,7 +8,10 @@ import org.graphstream.ui.spriteManager.SpriteManager;
 import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.view.Viewer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -77,10 +79,10 @@ public class VisualizationEngine extends TimerTask {
             this.isRunning = false;
             return;
         }
-
-        removeOldSpritesFromGraph();
-
         State currentState = this.states.get(currentTick);
+
+        removeOldSpritesFromGraph(currentState.getUserStates());
+
         for (UserState userState : currentState.getUserStates()) {
             this.drawUserState(userState);
         }
@@ -94,13 +96,18 @@ public class VisualizationEngine extends TimerTask {
 
     /**
      * Removes sprites that are currently visible on the graph.
+     *
+     * @param userStates Current UserStates in the State
      */
-    private void removeOldSpritesFromGraph() {
+    private void removeOldSpritesFromGraph(List<UserState> userStates) {
         List<Sprite> toRemoveSprites = new ArrayList<>();
         this.spriteManager.iterator().forEachRemaining(toRemoveSprites::add);
 
         for (Sprite sprite : toRemoveSprites) {
-            this.spriteManager.removeSprite(sprite.getId());
+            if (userStates.stream()
+                    .noneMatch(userState -> userState.getPersonId() == Integer.parseInt(sprite.getId()))) {
+                this.spriteManager.removeSprite(sprite.getId());
+            }
         }
     }
 
@@ -121,13 +128,16 @@ public class VisualizationEngine extends TimerTask {
 
         if (!spriteCurrentEdge.equals(stateCurrentEdge)) {
             if (!userState.getStationStart().equals(userState.getStationEnd())) {
-                System.out.println("Edges do not match");
                 sprite.detach();
                 sprite.attachToEdge(userState.getEdgeId());
+                sprite.setAttribute("currentEdge", userState.getEdgeId());
+
 
             } else if (userState.getStationStart().equals(userState.getStationEnd())) {
                 sprite.detach();
                 sprite.attachToNode("" + userState.getStationEnd());
+                sprite.setAttribute("currentEdge", userState.getEdgeId());
+
             }
         }
 
@@ -160,7 +170,6 @@ public class VisualizationEngine extends TimerTask {
                 }
 
                 System.out.println("Edge " + userState.getStationStart() + "_" + userState.getStationEnd() + " does not exist.");
-
                 return null; // Edge not found.
             }
 
@@ -250,9 +259,9 @@ public class VisualizationEngine extends TimerTask {
         ArrayList<UserState> userStates = new ArrayList<>();
 
         states.stream()
-            .forEach(state -> state.getUserStates().stream()
-                .filter(UserState::hasData)
-                .forEach(userStateWithData -> userStates.add(userStateWithData)));
+                .forEach(state -> state.getUserStates().stream()
+                        .filter(UserState::hasData)
+                        .forEach(userStateWithData -> userStates.add(userStateWithData)));
 
         return userStates.stream()
                 .filter(distinctByKey(UserState::getPersonId))

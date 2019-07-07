@@ -12,7 +12,7 @@ import java.util.Properties;
 
 /**
  * Main window of the application.
- *
+ * <p>
  * This class contains GUI elements but is not responsible for rendering of the graph.
  * Graph visualization can be found in VisualizationEngine.
  */
@@ -31,7 +31,7 @@ public class VisualizationWindow extends JFrame {
 
     /**
      * Customized JTextField.
-     *
+     * <p>
      * Editing and focusing disabled.
      * Content is centered.
      */
@@ -58,7 +58,7 @@ public class VisualizationWindow extends JFrame {
 
     /**
      * Customized JButton.
-     *
+     * <p>
      * Focusing disabled.
      */
     private static class Button extends JButton {
@@ -84,7 +84,7 @@ public class VisualizationWindow extends JFrame {
         super("Dissemination Visualization");
 
         // Loading the start time of the simulation from the config
-        try(InputStream input = getClass().getClassLoader().getResourceAsStream("config.properties")) {
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream("config.properties")) {
             if (input == null) {
                 System.out.println("Unable to load config");
                 return;
@@ -216,7 +216,12 @@ public class VisualizationWindow extends JFrame {
         sliderTick.setValue(0);
         sliderTick.setMinimum(0);
         sliderTick.setMaximum(traceGenerationEngine.getTotal_ticks());
-        sliderTick.addChangeListener(e -> visualizationEngine.setCurrentTick(sliderTick.getValue()));
+        sliderTick.addChangeListener(e -> {
+            // Only fire this event if the slider is manually adjusted.
+            if (sliderTick.getValueIsAdjusting()) {
+                visualizationEngine.setCurrentTick(sliderTick.getValue());
+            }
+        });
 
         // Indicator for the agents that have data
         JLabel labelActiveAgents = new JLabel("Data carriers");
@@ -272,14 +277,13 @@ public class VisualizationWindow extends JFrame {
                 timeH = t / 3600;
                 timeM = (t % 3600) / 60;
                 timeS = t % 60;
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
                 timeH = timeM = timeS = 0;
             }
 
             if (tick == traceGenerationEngine.getTotal_ticks() - 1) {
-                fieldFinalDissemination.setText(String.format("%.2f%%", visualizationEngine.getTotalNumberOfUsersWithData() * 100 /traceGenerationEngine.getTotal_users()));
+                fieldFinalDissemination.setText(String.format("%.2f%%", visualizationEngine.getTotalNumberOfUsersWithData() * 100 / traceGenerationEngine.getTotal_users()));
             }
 
             fieldClock.setText(String.format("%02d:%02d:%02d", timeH, timeM, timeS));
