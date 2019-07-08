@@ -32,6 +32,7 @@ public class VisualizationEngine extends TimerTask {
 
     private OnTickListener onTickListener;
 
+
     /**
      * Initializes the visualization engine with the given graph and states
      *

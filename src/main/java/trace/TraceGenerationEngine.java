@@ -1,4 +1,4 @@
-package TraceGenerationEngine;
+package trace;
 
 import common.ScheduleItem;
 import common.State;

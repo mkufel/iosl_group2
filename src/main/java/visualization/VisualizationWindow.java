@@ -1,9 +1,9 @@
 package visualization;
 
-import TraceGenerationEngine.TraceGenerationEngine;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.State;
 import org.graphstream.ui.swingViewer.ViewPanel;
+import trace.TraceGenerationEngine;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

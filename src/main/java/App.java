@@ -1,5 +1,5 @@
 
-import TraceGenerationEngine.TraceGenerationEngine;
+import trace.TraceGenerationEngine;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.Map;
 import common.State;
