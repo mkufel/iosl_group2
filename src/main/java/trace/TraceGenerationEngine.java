@@ -4,7 +4,7 @@ import common.ScheduleItem;
 import common.State;
 import common.Station;
 import common.UserState;
-import init.InitEngine;
+import parser.ParserEngine;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,12 +12,11 @@ import java.io.InputStream;
 import java.util.*;
 
 
-
 /**
- * This class is reponsible for generating the user traces using data from the InitEngine
+ * This class is reponsible for generating the user traces using data from the ParserEngine.
  */
 public class TraceGenerationEngine {
-    InitEngine initEngine;
+    ParserEngine parserEngine;
     ArrayList<Station> allUBahnStations;
     Map<Long, ArrayList<ScheduleItem>> stopsWithSchedule;
 
@@ -31,15 +30,15 @@ public class TraceGenerationEngine {
         System.out.println(tce.getStates());
     }
 
-    public TraceGenerationEngine(InitEngine initEngine) {
-        allUBahnStations = initEngine.getUBahnStations();
-        stopsWithSchedule = initEngine.getStopsWithSchedule();
+    public TraceGenerationEngine(ParserEngine parserEngine) {
+        allUBahnStations = parserEngine.getUBahnStations();
+        stopsWithSchedule = parserEngine.getStopsWithSchedule();
     }
 
     public TraceGenerationEngine() {
-        initEngine = new InitEngine();
-        allUBahnStations = initEngine.getUBahnStations();
-        stopsWithSchedule = initEngine.getStopsWithSchedule();
+        parserEngine = new ParserEngine();
+        allUBahnStations = parserEngine.getUBahnStations();
+        stopsWithSchedule = parserEngine.getStopsWithSchedule();
     }
 
     public int getTotal_users() {
@@ -143,8 +142,8 @@ public class TraceGenerationEngine {
     /**
      * Contains logic for calculating the next train to board given a list of trains leaving from the current station
      *
-     * @param scheduleItems A list of all trains departing from a given station throughout the day
-     * @param tick The current tick for which we require a departing train
+     * @param scheduleItems   A list of all trains departing from a given station throughout the day
+     * @param tick            The current tick for which we require a departing train
      * @param previousStation The station from which the user just arrived, to avoid the case where the user goes back to the same station
      * @return ScheduleItem One element of the scheduleItems based on the logic of the function
      */

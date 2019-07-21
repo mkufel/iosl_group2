@@ -1,5 +1,8 @@
 package common;
 
+/**
+ * Represents one line in the schedule of a transit vehicle.
+ */
 public class ScheduleItem {
     private String line_name;
     private String departure_time;

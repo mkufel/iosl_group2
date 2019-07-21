@@ -1,4 +1,4 @@
-package init;
+package parser;
 
 import com.opencsv.CSVReader;
 import common.GeoCoords;
@@ -16,7 +16,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class InitEngine {
+/**
+ * Parses input files and converts them to the formats used in the project.
+ */
+public class ParserEngine {
 
     Map<String, String> routeIdsToLineNames;
     Map<String, ArrayList<String>> routesToTrips;
@@ -25,21 +28,24 @@ public class InitEngine {
     Map<String, ArrayList<Station>> tripsToStations;
     Map<Station, ArrayList<Long>> stationsToDuplicateIds;
 
-    public InitEngine() {
+    public ParserEngine() {
     }
 
     /**
      * If mapping routeIdsToLineNames doesn't exist, parses routes.csv and creates the mapping route Ids to Line names
      * If mapping routesToTrips doesn't exist, parses routes.csv and creates the mapping route Ids to Trip ids
      * Creates a mapping of stopIds to a list of their ScheduleItems (all trains leaving from the station)
+     *
      * @return Mapping stopId - ArrayList<ScheduleItem>
      */
     public Map<Long, ArrayList<ScheduleItem>> getStopsWithSchedule() {
         System.out.println("Parsing stops with their schedules...");
 
         if (routeIdsToLineNames == null) routeIdsToLineNames = this.readRoutesFromCSV("resources/routes.csv");
-        if (routesToTrips == null) routesToTrips = this.mapRoutesToTripsFromCSV(routeIdsToLineNames, "resources/trips.csv");
-        if (stopsToScheduleItems == null) stopsToScheduleItems = this.mapStopsToScheduleItems("resources/stop_times.csv", routesToTrips, routeIdsToLineNames);
+        if (routesToTrips == null)
+            routesToTrips = this.mapRoutesToTripsFromCSV(routeIdsToLineNames, "resources/trips.csv");
+        if (stopsToScheduleItems == null)
+            stopsToScheduleItems = this.mapStopsToScheduleItems("resources/stop_times.csv", routesToTrips, routeIdsToLineNames);
 
         return stopsToScheduleItems;
     }
@@ -48,6 +54,7 @@ public class InitEngine {
      * From mappings routes - trips and trips - stations, create a mapping routes - stations.
      * Then use the mapping of routeId - routeName to extract line names.
      * Finally, create a list of all Stations (line names used as parameters).
+     *
      * @return List of Stations
      */
     public ArrayList<Station> getUBahnStations() {
@@ -78,11 +85,13 @@ public class InitEngine {
     /**
      * Creates a common.Map - a set of Ubahn lines (id, name, List<Station>) based on the data from mappings
      * routes - trips, trips - stations, routeId - routeName
+     *
      * @return common.Map containing all Ubahn lines contained in the csv input files
      */
     public common.Map createMapFromBVGFiles() {
         if (routeIdsToLineNames == null) routeIdsToLineNames = this.readRoutesFromCSV("resources/routes.csv");
-        if (routesToTrips == null) routesToTrips = this.mapRoutesToTripsFromCSV(routeIdsToLineNames, "resources/trips.csv");
+        if (routesToTrips == null)
+            routesToTrips = this.mapRoutesToTripsFromCSV(routeIdsToLineNames, "resources/trips.csv");
         if (tripsToStations == null) tripsToStations = this.parseStationTimesFromCSV("resources/stop_times.csv");
         if (routesToStations == null) routesToStations = this.mapRoutesToStations(routesToTrips, tripsToStations);
         routesToStations = this.addStationCoordsToRouteStationsMapping(routesToStations, "resources/stops.csv");
@@ -95,6 +104,7 @@ public class InitEngine {
 
     /**
      * Changes Ids of duplicate stations to corrected fixed Ids for given stations. Removes duplicate stations for each line.
+     *
      * @param routesToStationsWithDuplicates
      * @return routesToStationsWithoutDuplicates
      */
@@ -108,11 +118,11 @@ public class InitEngine {
 
                 // Find the fixed station supposed to replace the duplicates
                 Station correctStation = stationsToDuplicateIds
-                                .keySet()
-                                .stream()
-                                .filter( x -> stationsToDuplicateIds.get(x).contains(checkedStation.getId()))
-                                .findFirst()
-                                .orElse(null);
+                        .keySet()
+                        .stream()
+                        .filter(x -> stationsToDuplicateIds.get(x).contains(checkedStation.getId()))
+                        .findFirst()
+                        .orElse(null);
 
                 // Correct the station Id and add it to the array of corrected Stations
                 checkedStation.setId(correctStation.getId());
@@ -171,7 +181,7 @@ public class InitEngine {
      * Parses the trips.csv and creates a mapping of routeId - List<tripId>
      *
      * @param routeIdToLineName Dictionary routeId -> UbahnLineName
-     * @param fileName    path to trips.csv
+     * @param fileName          path to trips.csv
      * @return Hashmap, key:routeId, value: ArrayList<tripId>
      */
     private Map<String, ArrayList<String>> mapRoutesToTripsFromCSV(Map<String, String> routeIdToLineName, String fileName) {
@@ -285,7 +295,7 @@ public class InitEngine {
      * Parses stops.csv and extends the mapping routeId - List<Station> with GeoCoordinates of each station.
      *
      * @param routesToStations mapping of routeId - List<stationId>
-     * @param fileName path to stops.csv
+     * @param fileName         path to stops.csv
      * @return mapping of routeId - List<Station>
      */
     private Map<String, ArrayList<Station>> addStationCoordsToRouteStationsMapping(Map<String, ArrayList<Station>> routesToStations, String fileName) {
@@ -327,7 +337,8 @@ public class InitEngine {
     /**
      * Creates a List of lines based on the mapping routesIdsToStations, extracts names of U-bahn lines based on
      * their identifier and creates a Line for each U-bahn line. Then adds all lines to a Map and returns it.
-     * @param routeIdsToStations Mapping of routeIds to StationIds
+     *
+     * @param routeIdsToStations  Mapping of routeIds to StationIds
      * @param routeIdsToLineNames Mapping of routeIds to route names
      * @return Map object containing all U-bahn lines.
      */
@@ -365,10 +376,11 @@ public class InitEngine {
     /**
      * Parses stop_times.csv and for each of the stops creates a List<ScheduleItem> representing trains leaving from
      * the station throughout the day.
-     * @param fileName path to stop_times.csv
+     *
+     * @param fileName             path to stop_times.csv
      * @param routeIdsToTripIds
      * @param routesIdsToLineNames
-     * @return Map<Long: stopId, ArrayList<ScheduleItem>> for each of the stations from stop_times.csv
+     * @return Map<Long:       stopId   ,       ArrayList   <   ScheduleItem>> for each of the stations from stop_times.csv
      */
     private Map<Long, ArrayList<ScheduleItem>> mapStopsToScheduleItems(String fileName, Map<String, ArrayList<String>> routeIdsToTripIds, Map<String, String> routesIdsToLineNames) {
         Map<Long, ArrayList<ScheduleItem>> stopsToScheduleItems = new HashMap<>();
@@ -421,10 +433,11 @@ public class InitEngine {
      * Checks if nextRecord and nextNextRecord are on the same trip and if so then it creates a new schedule item
      * for a stop from nextRecord to a stop from nextNextRecord. If any of the stopIds is a duplicate, it is replaced
      * with an id of a fixed Station corresponding to the duplicate
+     *
      * @param stopsToScheduleItems
-     * @param nextRecord parsed from stops_times.csv
-     * @param nextNextRecord parsed from stops_times.csv, proceeding nextRecord
-     * @param lineName name of the Ubahn serving between nextRecord and nextNextRecord
+     * @param nextRecord           parsed from stops_times.csv
+     * @param nextNextRecord       parsed from stops_times.csv, proceeding nextRecord
+     * @param lineName             name of the Ubahn serving between nextRecord and nextNextRecord
      * @return stopsToScheduleItems with a new ScheduleItem for station in nextRecord directed to the station in nextNextRecord
      */
     private Map<Long, ArrayList<ScheduleItem>> updateStopsToScheduleItemsMap(Map<Long, ArrayList<ScheduleItem>> stopsToScheduleItems, String[] nextRecord, String[] nextNextRecord, String lineName) {
@@ -469,8 +482,9 @@ public class InitEngine {
 
     /**
      * Returns a name of an U-bahn line that serves a given trip
+     *
      * @param tripId
-     * @param routeIdsToTrips Mapping of routeIds to TripIds
+     * @param routeIdsToTrips      Mapping of routeIds to TripIds
      * @param routesIdsToLineNames Mapping of routeIds to line names
      * @return String U-bahn name corresponding to trip_id
      */
@@ -494,6 +508,7 @@ public class InitEngine {
      * Parses stops.csv and creates a mapping of Station - List<duplicateStationId> for stations with the same geo location.
      * Stations with the same geo-location can be represented by multiple station instances in the stops.csv.
      * For the mapping, it selects a single instance and maps it to a list of ids of all duplicate stations.
+     *
      * @return mapping Station - List<Long: duplicateStationId>
      */
     private Map<Station, ArrayList<Long>> getDuplicatesStopsFromCSV() {
@@ -540,6 +555,7 @@ public class InitEngine {
      * Removes Schedule items that lead to non-adjacent stations (not directly preceeding and directly suceeding) a given station.
      * Such items appear sporadically in the BVG schedule, we remove them to prevent errors in the Map/Graph which has
      * only edges between adjacent stations.
+     *
      * @param stopsToScheduleItems
      * @return stopsToScheduleItemsWithoutInvalidItems
      */
@@ -571,8 +587,9 @@ public class InitEngine {
     /**
      * Returns a List<stopId> of stops adjacent (directly preceeding and suceeding) to stopId.
      * Note that a stop can be a part of more than one Ubahn line.
+     *
      * @param stopId for which adjacent stops are looked for
-     * @return List<Long: stopId> adjacent to stopId
+     * @return List<Long:       stopId> adjacent to stopId
      */
     private ArrayList<Long> getListOfPossibleNextStops(Long stopId) {
         ArrayList<Long> stops = new ArrayList<>();
@@ -584,10 +601,12 @@ public class InitEngine {
                 if (routeStations.get(i).getId().equals(stopId)) {
                     try {
                         stops.add(routeStations.get(i - 1).getId());
-                    } catch (Exception e) {}
-                    try{
+                    } catch (Exception e) {
+                    }
+                    try {
                         stops.add(routeStations.get(i + 1).getId());
-                    } catch (Exception e) {}
+                    } catch (Exception e) {
+                    }
                 }
             }
         }

@@ -2,6 +2,9 @@ package dissemination;
 
 import common.UserState;
 
+/**
+ * Represents two Users who can exchange data with each other.
+ */
 public class UserStatePair {
     private UserState sender;
 

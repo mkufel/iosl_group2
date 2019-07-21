@@ -6,6 +6,9 @@ import common.UserState;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Responsible for adding dissemination information to States.
+ */
 public class DisseminationEngine {
     private static final Random RANDOM;
 
