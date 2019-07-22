@@ -1,5 +1,6 @@
 # IoSL Group 2
-
+## Code Documentation
+[Available online as Javadocs](https://imolcean.github.io/iosl-group2/)
 ## Requirements
 
 - Java 8+ ([How to install](https://openjdk.java.net/install/))
